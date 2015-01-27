@@ -7,7 +7,7 @@ int find_substr(int *str_ar, int ar_size, int from_index, int to_index, int *sub
 
 int main() {
     int i,j;
-    int size;
+    int size = 17;
     int size2;
     int substr_start_index = 0;
     int substr_end_index = 0;
@@ -15,14 +15,22 @@ int main() {
 
     cout << "Enter the buffer size: ";
     cin >> size;
+    
+//    int *arr1 = (int *) malloc (size * sizeof(int));
 
-    int *arr1 = (int *) malloc (size * sizeof(int));
-    int *arr2 = (int *) malloc (size * sizeof(int));
+//    if ( size == 17 ) {
 
-    for (i=0; i < size; i++) {
-        arr1[i] = rand() % size;
-        cout << i << " : " << arr1[i] << '\n';
+      int  arr1[17] = { 100, 113, 110, 85, 105, 102, 86, 63, 81, 101, 94, 106, 101, 79, 94, 90, 97 };
+
+/*    } else {
+
+        for (i=0; i < size; i++) {
+            arr1[i] = rand() % size;
+            cout << i << " : " << arr1[i] << '\n';
+        }
     }
+*/
+    int *arr2 = (int *) malloc (size * sizeof(int));
 
     size2 = size - 1;
     cout << "Summ array : ";
@@ -62,7 +70,7 @@ int find_substr(int *str_ar, int ar_size, int from_index, int to_index, int *sub
     left_sum = -9999;
     right_sum = -9999;
 
-    if (ar_size == 2) {
+    if (ar_size < 3) {
         left_subsum = str_ar[from_index];
         right_subsum = str_ar[to_index];
         left_index = from_index;
