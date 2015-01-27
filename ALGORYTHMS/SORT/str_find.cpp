@@ -3,12 +3,15 @@
 using namespace std;
 
 //int find_max_substr(int *str_ar, int ar_size);
-int find_substr(int *str_ar, int ar_size, int from_index, int to_index);
+int find_substr(int *str_ar, int ar_size, int from_index, int to_index, int *substr_start, int *substr_end, int *substr_sum);
 
 int main() {
     int i,j;
     int size;
     int size2;
+    int substr_start_index = 0;
+    int substr_end_index = 0;
+    int max_sum = 0;
 
     cout << "Enter the buffer size: ";
     cin >> size;
@@ -29,12 +32,13 @@ int main() {
     }
     cout << "\n";
 
-    find_substr(arr2, size2, 0, (size2 - 1));
+    find_substr(arr2, size2, 0, (size2 - 1), substr_start_index, substr_end_index, max_sum);
 
     exit(0);
 }
 
-int find_substr(int *str_ar, int ar_size, int from_index, int to_index) {
+//int find_substr(int *str_ar, int ar_size, int from_index, int to_index) {
+int find_substr(int *str_ar, int ar_size, int from_index, int to_index, int *substr_start, int *substr_end, int *substr_sum) {
     int i;
     int mid = ar_size / 2;
     int left_sum, right_sum, left_index, right_index;
@@ -63,6 +67,10 @@ int find_substr(int *str_ar, int ar_size, int from_index, int to_index) {
     left_substr = str_ar[from_index];
     right_substr = str_ar[to_index];
     mid_substr = left_sum + right_sum;
+
+    substr_start = left_index;
+    substr_end = right_index;
+    substr_sum = mid_substr;
 
     cout << "MID substr : ";
     for (i = left_index; i < (right_index + 1); i++) {
