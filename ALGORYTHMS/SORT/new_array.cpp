@@ -4,6 +4,8 @@ using namespace std;
 
 int print_out_array(int **array_to_print, int Xsz, int Ysz);
 int create_ndimentional_arr(int **array_to_create, int Xsz, int Ysz);
+int sum_array (int **arrayA, int **arrayB, int Xsz, int Ysz);
+int multiply_array (int **arrayA, int **arrayB, int Xsz, int Ysz);
 
 int main() {
     int matrix1[2][2] = {{1,2},
@@ -57,6 +59,9 @@ int main() {
     create_ndimentional_arr(matrixB, Xsize, Ysize);
     print_out_array(matrixB, Xsize, Ysize);
 
+    sum_array (matrixA, matrixB, Xsize, Ysize);
+    multiply_array (matrixA, matrixB, Xsize, Ysize);
+
     exit(0);
 
 }
@@ -89,3 +94,52 @@ int print_out_array(int **array_to_print, int Xsz, int Ysz) {
     return 1;
 }
 
+int sum_array (int **arrayA, int **arrayB, int Xsz, int Ysz) {
+
+    int arrayC[Xsz][Ysz];
+
+    for (int i = 0; i < Xsz; i++) {
+        for (int j = 0; j < Ysz; j++) {
+            arrayC[i][j] = arrayA[i][j] + arrayB[i][j];
+        }
+    }
+
+    cout << "Sum of A and B : \n";
+    for (int i = 0; i < Xsz; i++) {
+        for (int j = 0; j < Ysz; j++) {
+            cout << arrayC[i][j] << "\t";
+        }
+        cout << "\n";
+    }
+    cout << "\n";
+
+    return 1;
+}
+
+int multiply_array (int **arrayA, int **arrayB, int Xsz, int Ysz) {
+
+    int arrayC[Xsz][Ysz];
+
+    for (int j = 0; j < Ysz; j++) {
+    cout << "\n";
+        for (int i = 0; i < Xsz; i++) {
+    cout << "\t\t";
+            arrayC[i][j] = 0;
+            for (int k = 0; k < Xsz; k++) {
+                arrayC[i][j] = arrayC[i][j] + (arrayA[i][k] * arrayB[k][i]);
+                cout << arrayC[i][j] << " " << arrayA[i][k] << " " << arrayB[k][i] << "\t";
+            }
+        }
+    }
+
+    cout << "\nMulitply of A and B : \n";
+    for (int j = 0; j < Ysz; j++) {
+        for (int i = 0; i < Xsz; i++) {
+            cout << arrayC[i][j] << "\t";
+        }
+        cout << "\n";
+    }
+    cout << "\n";
+
+    return 1;
+}
