@@ -1,47 +1,92 @@
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 using namespace std;
 
 int insertion(int *ar1, int ar_size);
 int decompose(int *ar1, int ar_size);
+int sort_On(int *array_to_sort, int ar_size);
+int compare(const void * x1, const void * x2);
 
-int main() {
+int main() 
+{
     int i,j;
     int size;
+    unsigned int start_time, end_time;
+    srand( (unsigned)clock() );
 
     cout << "Enter the buffer size: ";
     cin >> size;
 
     int *arr1 = (int *) malloc (size * sizeof(int));
     int *arr2 = (int *) malloc (size * sizeof(int));
+    int *arr3 = (int *) malloc (size * sizeof(int));
+    int *arr4 = new int [size];
 
     for (i=0; i < size; i++) {
-        arr1[i] = rand() % size;
-        arr2[i] = arr1[i];
-        cout << i << " : " << arr1[i] << '\n';
+//        arr1[i] = rand() % size;
+        arr4[i] = arr3[i] = arr2[i] = arr1[i] = rand() % size;
+//        arr2[i] = arr1[i];
+//        arr3[i] = arr1[i];
+//        arr4[i] = arr1[i];
+//        cout << arr1[i] << ' ';
     }
+    cout << '\n';
 
+    start_time = clock();
     insertion(arr1, size);
+    end_time = clock();
+    int insertion_time = end_time - start_time;
 
+    start_time = clock();
     decompose(arr2, size);
+    end_time = clock();
+    int decompose_time = end_time - start_time;
+
+    start_time = clock();
+    sort_On(arr3, size);
+    end_time = clock();
+    int On_time = end_time - start_time;
+
+    start_time = clock();
+    qsort(arr4, size, sizeof(int), compare);
+    end_time = clock();
+    int qsort_time = end_time - start_time;
 
     cout << "Insertion Result : ";
     for (int k = 0; k < size; k++) {
         cout <<  arr1[k] << " ";
     }
     cout << "\n";
+    cout << "Time : " << insertion_time << " (mls)\n";
 
     cout << "Decompose Result : ";
     for (int k = 0; k < size; k++) {
         cout <<  arr2[k] << " ";
     }
     cout << "\n";
+    cout << "Time : " << decompose_time << " (mls)\n";
+
+    cout << "O(n) sort Result : ";
+    for (int k = 0; k < size; k++) {
+        cout <<  arr3[k] << " ";
+    }
+    cout << "\n";
+    cout << "Time : " << On_time << " (mls)\n";
+
+    cout << "C++ Qsort Result : ";
+    for (int k = 0; k < size; k++) {
+        cout <<  arr4[k] << " ";
+    }
+    cout << "\n";
+    cout << "Time : " << qsort_time << " (mls)\n";
 
 
     exit(0);
 }
 
-int insertion(int *ar1, int ar_size) {
+int insertion(int *ar1, int ar_size) 
+{
 
     int k;
     int k_hand;
@@ -58,17 +103,18 @@ int insertion(int *ar1, int ar_size) {
         ar1[k_hand + 1] = key;
     }
 
-    cout << "Func Ar : ";
+/*    cout << "Func Ar : ";
     for (k = 0; k < ar_size; k++) {
         cout <<  ar1[k] << " ";
     }
 
     cout << "\n";
-
+*/
     return 1;
 }
 
-int decompose(int *ar1, int ar_size) {
+int decompose(int *ar1, int ar_size) 
+{
 
     int new_size1 = ar_size / 2;
     int new_size2 = ar_size - new_size1;
@@ -153,3 +199,36 @@ int decompose(int *ar1, int ar_size) {
 
     return 1;
 }
+
+int sort_On(int *array_to_sort, int ar_size) 
+{
+
+    int *arrayA = new int [ar_size];
+    for (int i = 0; i < ar_size; i++) {
+        arrayA[i] = 0;
+    }
+
+    for (int i = 0; i < ar_size; i++) {
+        int ar_index = array_to_sort[i];
+        arrayA[ar_index]++;
+    }
+
+    int arr_index = 0;
+    int j;
+    for (int i = 0; i < ar_size; i++) {
+        if (arrayA[i] != 0) {
+            for (j = 0; j < arrayA[i]; j++) {
+                array_to_sort[arr_index] = i;
+                arr_index++;
+            }
+        }
+    }
+
+    return 1;
+}
+
+int compare(const void * x1, const void * x2) 
+{
+        return ( *(int*)x1 - *(int*)x2 );
+}
+
