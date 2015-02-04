@@ -2,7 +2,10 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
-using namespace std;
+#include <algorithm>
+#include <bitset>
+
+//using namespace std;
 
 // Лучше использовать vector.
 // У него 2 преимущества:
@@ -16,14 +19,24 @@ using namespace std;
 //    Передавая по отдельности можно случайно передать размер не того блока.
 //    Или, например, постоянная ошибка при вызове memset() — перепутать размер блока и символ, которым этот блок надо заполнить.
 //    С единым объектом этого не произойдёт.
-int insertion(vector<int>& ar1);
+int insertion(std::vector<int>& ar1);
 // Стандартное название алгоритма — merge sort.
-int merge_sort(vector<int>& ar1);
+int merge_sort(std::vector<int>& ar1);
 // Стандартное название алгоритма — counting sort.
-int counting_sort(int *array_to_sort, int ar_size);
+//int counting_sort(int *array_to_sort, int ar_size);
+int counting_sort(std::vector<int>& array_to_sort, int ar_size); 
+
+void to_left(size_t *num, size_t *left_num);
+void to_right(size_t *num, size_t *right_num);
+//void max_heapify(std::vector<int>& ar1, size_t index);
+void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size);
+void build_max_heap(std::vector<int>& array_heap);
+void heapsort(std::vector<int>& array_to_sort);
+int partition(std::vector<int>& qsort_array, int start_i, int end_i);
+void quick_sort (std::vector<int>& qsort_array, int start_index, int end_index);
 
 // Простая функция проверки отсортированности массива по возрастанию.
-bool check_sorted(vector<int>& ar1) {
+bool check_sorted(std::vector<int>& ar1) {
   for (size_t i = 0; i + 1 < ar1.size(); ++i)
     if (ar1[i] > ar1[i + 1])
       return false;
@@ -55,8 +68,8 @@ int main()
     // Которое слабо меняется от запуска к запуску.
     srand( (unsigned)clock() );
 
-    cout << "Enter the buffer size: ";
-    cin >> size;
+    std::cout << "Enter the buffer size: ";
+    std::cin >> size;
 
     // malloc() — это C, в C++ используется new и new[].
     // Они запустят конструкторы (т.е. инициализируют память) в отличие от malloc().
@@ -66,20 +79,28 @@ int main()
     // Например, vector для массива объектов или умный указатель (uniq_ptr, shared_ptr) для одиночного объекта.
     // Такой менеджер сам освободит ресурс автоматически в своём деструкторе.
     // Страуструп называет такой подход RAII (Resource Acquisition Is Initialization).
-    vector<int> arr1(size);
-    vector<int> arr2(size);
-    int *arr3 = (int *) malloc (size * sizeof(int));
-    int *arr4 = new int [size];
+    std::vector<int> arr1(size);
+    std::vector<int> arr_to_sort(size);
+    std::vector<int> arr2(size);
+    std::vector<int> arr3(size);
+    std::vector<int> arr4(size);
+//    int *arr3 = (int *) malloc (size * sizeof(int));
+//    int *arr4 = new int [size];
+
+    std::vector<int> test_array_heap(size);
+    std::vector<int> test_array_quicksort(size);
 
     for (i=0; i < size; i++) {
 //        arr1[i] = rand() % size;
-        arr4[i] = arr3[i] = arr2[i] = arr1[i] = rand() % size;
+        arr_to_sort[i] = arr4[i] = arr3[i] = arr2[i] = arr1[i] = rand() % size;
+        test_array_heap[i] = arr4[i];
+        test_array_quicksort[i] = arr4[i];
 //        arr2[i] = arr1[i];
 //        arr3[i] = arr1[i];
 //        arr4[i] = arr1[i];
 //        cout << arr1[i] << ' ';
     }
-    cout << '\n';
+    std::cout << '\n';
 
     // Если пользоваться низкоуровневыми функциями, то лучше использовать современный clock_gettime().
     // С CLOCK_MONOTONIC для измерения интервалов реального времени и CLOCK_PROCESS_CPUTIME_ID/CLOCK_THREAD_CPUTIME_ID для измерения потребления CPU.
@@ -110,49 +131,98 @@ int main()
     start_time = clock();
     // Если пишешь на C++, проще использовать std::sort.
     // У него и компаратор по умолчанию есть, свой писать не нужно.
-    qsort(arr4, size, sizeof(int), compare);
+//    qsort(arr4, size, sizeof(int), compare);
+    std::sort(arr_to_sort.begin(), arr_to_sort.end());
     end_time = clock();
     clock_t qsort_time = end_time - start_time;
 
-    cout << "Insertion Result : ";
+    start_time = clock();
+    heapsort(test_array_heap);
+    end_time = clock();
+    clock_t heap_time = end_time - start_time;
+
+    start_time = clock();
+    quick_sort(test_array_quicksort,0,test_array_quicksort.size() - 1);
+    end_time = clock();
+    clock_t quicksort_time = end_time - start_time;
+
+    std::cout << "Insertion Result : ";
     for (size_t k = 0; k < size; k++) {
-        cout <<  arr1[k] << " ";
+        std::cout <<  arr1[k] << " ";
     }
-    cout << "\n";
+    std::cout << "\n";
     if (check_sorted(arr1)) {
-      cout << "OK\n";
+      std::cout << "OK\n";
     } else {
-      cout << "ERROR\n";
+      std::cout << "ERROR\n";
       return 1;
     }
-    cout << "Time : " << insertion_time << " (mls)\n";
+    std::cout << "Time : " << insertion_time << " (mls)\n";
 
-    cout << "Decompose Result : ";
+    std::cout << "\nDecompose Result : ";
     for (size_t k = 0; k < size; k++) {
-        cout <<  arr2[k] << " ";
+        std::cout <<  arr2[k] << " ";
     }
-    cout << "\n";
+    std::cout << "\n";
     if (check_sorted(arr2)) {
-      cout << "OK\n";
+      std::cout << "OK\n";
     } else {
-      cout << "ERROR\n";
+      std::cout << "ERROR\n";
       return 1;
     }
-    cout << "Time : " << decompose_time << " (mls)\n";
+    std::cout << "Time : " << decompose_time << " (mls)\n";
 
-    cout << "O(n) sort Result : ";
+    std::cout << "\nO(n) sort Result : ";
     for (int k = 0; k < size; k++) {
-        cout <<  arr3[k] << " ";
+        std::cout <<  arr3[k] << " ";
     }
-    cout << "\n";
-    cout << "Time : " << On_time << " (mls)\n";
+    std::cout << "\n";
+    if (check_sorted(arr3)) {
+      std::cout << "OK\n";
+    } else {
+      std::cout << "ERROR\n";
+      return 1;
+    }
+    std::cout << "Time : " << On_time << " (mls)\n";
 
-    cout << "C++ Qsort Result : ";
+    std::cout << "\nC++ std::sort Result : ";
     for (int k = 0; k < size; k++) {
-        cout <<  arr4[k] << " ";
+        std::cout <<  arr_to_sort[k] << " ";
     }
-    cout << "\n";
-    cout << "Time : " << qsort_time << " (mls)\n";
+    std::cout << "\n";
+    if (check_sorted(arr_to_sort)) {
+      std::cout << "OK\n";
+    } else {
+      std::cout << "ERROR\n";
+      return 1;
+    }
+    std::cout << "Time : " << qsort_time << " (mls)\n";
+
+    std::cout << "\nHeap sort Result : ";
+    for (int k = 0; k < size; k++) {
+        std::cout <<  test_array_heap[k] << " ";
+    }
+    std::cout << "\n";
+    if (check_sorted(test_array_heap)) {
+      std::cout << "OK\n";
+    } else {
+      std::cout << "ERROR\n";
+      return 1;
+    }
+    std::cout << "Time : " << heap_time << " (mls)\n";
+
+    std::cout << "\nQuicksort Result : ";
+    for (int k = 0; k < size; k++) {
+        std::cout <<  test_array_quicksort[k] << " ";
+    }
+    std::cout << "\n";
+    if (check_sorted(test_array_quicksort)) {
+      std::cout << "OK\n";
+    } else {
+      std::cout << "ERROR\n";
+      return 1;
+    }
+    std::cout << "Time : " << quicksort_time << " (mls)\n";
 
 
     // Скорее стилистическая правка.
@@ -167,13 +237,13 @@ int main()
     // А вот vector и умные указатели (uniq_ptr, shared_ptr) сами освободят память при выходе из блока (фигурных скобок), где они были определены.
 }
 
-int insertion(vector<int>& ar1) 
+int insertion(std::vector<int>& ar1) 
 {
 
     size_t k;
     int key;
 
-    cout << "Size : " << ar1.size() << "\t Arr : " << &ar1[0] << "\n";
+    std::cout << "Size : " << ar1.size() << "\t Arr : " << &ar1[0] << "\n";
     for (k = 0; k < ar1.size(); k++) {
         key = ar1[k];
         // Было написано:
@@ -210,7 +280,7 @@ int insertion(vector<int>& ar1)
     return 1;
 }
 
-int merge_sort(vector<int>& ar1) 
+int merge_sort(std::vector<int>& ar1) 
 {
 
     size_t new_size1 = ar1.size() / 2;
@@ -220,8 +290,8 @@ int merge_sort(vector<int>& ar1)
     size_t ii = 0;
 
     // '+ 1' был ради ненужного больше хака.
-    vector<int> narr1(new_size1);
-    vector<int> narr2(new_size2);
+    std::vector<int> narr1(new_size1);
+    std::vector<int> narr2(new_size2);
 
     for (ii = 0; ii < new_size1; ii++) {
         narr1[ii] = ar1[ii];
@@ -304,7 +374,8 @@ int merge_sort(vector<int>& ar1)
     return 1;
 }
 
-int counting_sort(int *array_to_sort, int ar_size) 
+//int counting_sort(int *array_to_sort, int ar_size) 
+int counting_sort(std::vector<int>& array_to_sort, int ar_size) 
 {
 
     int *arrayA = new int [ar_size];
@@ -334,5 +405,101 @@ int counting_sort(int *array_to_sort, int ar_size)
 int compare(const void * x1, const void * x2) 
 {
         return ( *(int*)x1 - *(int*)x2 );
+}
+
+void to_left(size_t *num, size_t *left_num)
+{
+    *left_num = *num << 1;
+    ++*left_num;
+}
+
+void to_right(size_t *num, size_t *right_num)
+{
+    *right_num = *num << 1;
+    *right_num += 2;
+}
+
+void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size)
+{
+    size_t left_i, right_i;
+    size_t l_largest, r_largest, largest;
+
+    to_left(&index, &left_i);
+    to_right(&index, &right_i);
+
+    if ((right_i <= heap_size) and (ar1[right_i] > ar1[index])) {
+        largest = right_i;
+    } else {
+        largest = index;
+    }
+
+    if ((left_i <= heap_size) and (ar1[left_i] > ar1[index])) {
+        largest = left_i;
+    }
+
+    if (largest != index) {
+        if ((ar1[left_i] < ar1[right_i]) and (right_i <= heap_size)){
+            largest = right_i;
+        }
+        size_t tmp_el;
+        tmp_el = ar1[index];
+        ar1[index] = ar1[largest];
+        ar1[largest] = tmp_el;
+        max_heapify(ar1, largest, heap_size);
+    }
+
+}
+
+void build_max_heap(std::vector<int>& array_heap)
+{
+    for (int i = (array_heap.size() - 1); i >= 0; i--) {
+        max_heapify(array_heap, i, array_heap.size() - 1);
+    }
+}
+
+void heapsort(std::vector<int>& array_to_sort)
+{
+    size_t array_size = array_to_sort.size();
+    build_max_heap(array_to_sort);
+    for (int i = array_to_sort.size() - 1; i >= 1; i--) {
+        size_t tmp_for_change;
+        tmp_for_change=array_to_sort[0];
+        array_to_sort[0] = array_to_sort[i];
+        array_to_sort[i] = tmp_for_change;
+        --array_size;
+        max_heapify(array_to_sort, 0, array_size - 1);
+
+    }
+}
+
+int partition(std::vector<int>& qsort_array, int start_i, int end_i)
+{
+    size_t base_element = qsort_array[end_i];
+    size_t tmp_for_change;
+    int left_i = start_i - 1;
+
+    for (int j = start_i; j < end_i; j++) {
+        if (qsort_array[j] <= base_element) {
+            ++left_i;
+            tmp_for_change = qsort_array[j];
+            qsort_array[j] = qsort_array[left_i];
+            qsort_array[left_i] = tmp_for_change;
+        }
+    }
+
+    qsort_array[end_i] = qsort_array[left_i + 1];
+    qsort_array[left_i + 1] = base_element;
+
+    ++left_i;
+    return left_i;
+}
+
+void quick_sort (std::vector<int>& qsort_array, int start_index, int end_index)
+{
+    if (start_index < end_index) {
+        size_t mid_index = partition(qsort_array, start_index, end_index);
+        quick_sort(qsort_array, start_index, mid_index - 1);
+        quick_sort(qsort_array, mid_index + 1, end_index);
+    }
 }
 
