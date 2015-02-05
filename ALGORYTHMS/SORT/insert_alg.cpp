@@ -5,6 +5,31 @@
 #include <algorithm>
 #include <bitset>
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+
+typedef int clockid_t;
+
+#define CLOCK_REALTIME 0
+
+// OS X does not have clock_gettime, use clock_get_time
+int clock_gettime(clockid_t clk_id, struct timespec *tp) {
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+
+    tp->tv_sec = mts.tv_sec;
+    tp->tv_nsec = mts.tv_nsec;
+
+    return 0;
+}
+#endif
+
+// Охота тебе постоянно писать 'std::'?
 //using namespace std;
 
 // Лучше использовать vector.
@@ -24,11 +49,9 @@ int insertion(std::vector<int>& ar1);
 int merge_sort(std::vector<int>& ar1);
 // Стандартное название алгоритма — counting sort.
 //int counting_sort(int *array_to_sort, int ar_size);
-int counting_sort(std::vector<int>& array_to_sort, int ar_size); 
+int counting_sort(std::vector<int>& array_to_sort); 
 
 //Heapsort
-void to_left(size_t *num, size_t *left_num);
-void to_right(size_t *num, size_t *right_num);
 void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size);
 void build_max_heap(std::vector<int>& array_heap);
 void heapsort(std::vector<int>& array_to_sort);
@@ -62,6 +85,11 @@ int main()
     // 2. Для удобства, и чтобы не замусоривать код и не отвлекать внимание на конкретный тип, в C++11 (стандарт C++, принятый в 2011 году) сделали автоматическое выведение типа.
     //    Можно написать: "auto size = ar1.size();" и тип выражения справа будет определять тип переменной.
     //    Только компилировать нужно "gcc -std=c++11 ...".
+
+    // Полезный флаг компилятора '-Wall' включает все предупреждения.
+    // Тут он говорит, что переменная j не нужна:
+    // c++ -Wall    insert_alg.cpp   -o insert_alg
+    // insert_alg.cpp:90:14: warning: unused variable 'j' [-Wunused-variable]
     size_t i,j;
     size_t size;
     // Типы надо брать как в документации на функцию, которую ты используешь.
@@ -138,7 +166,7 @@ int main()
     clock_t decompose_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    counting_sort(arr3, size);
+    counting_sort(arr3);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
     clock_t On_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
@@ -407,24 +435,32 @@ int merge_sort(std::vector<int>& ar1)
 }
 
 //int counting_sort(int *array_to_sort, int ar_size) 
-int counting_sort(std::vector<int>& array_to_sort, int ar_size) 
+int counting_sort(std::vector<int>& array_to_sort)
 {
+    // ar_size не удачное имя параметра, лучше max_value.
+    // Но я бы вообще обошёлся без него.
+    // Нужно просто динамически увеличивать arrayA с помощью метода resize().
+    // Ещё более продвинутый вариант - использовать для счётчиков не вектор, а хеш-мап.
+    // Но до хеш-мапа ты ещё не дошёл.
 
-    int *arrayA = new int [ar_size];
-    for (int i = 0; i < ar_size; i++) {
-        arrayA[i] = 0;
-    }
+    std::vector<int> arrayA; // Лучше vector<int>.
 
-    for (int i = 0; i < ar_size; i++) {
+    for (size_t i = 0; i < array_to_sort.size(); i++) {
         int ar_index = array_to_sort[i];
+        if (ar_index < 0) {
+            std::cerr << "Negative values are not supported in counting sort.\n";
+            exit(1);
+        }
+        if (ar_index >= arrayA.size())
+            arrayA.resize(ar_index + 1, 0);
+        // Не очень красиво, что массив индексируется int'ом, а не size_t, но пока оставим так.
         arrayA[ar_index]++;
     }
 
-    int arr_index = 0;
-    int j;
-    for (int i = 0; i < ar_size; i++) {
+    size_t arr_index = 0;
+    for (size_t i = 0; i < arrayA.size(); i++) {
         if (arrayA[i] != 0) {
-            for (j = 0; j < arrayA[i]; j++) {
+            for (size_t j = 0; j < arrayA[i]; j++) {
                 array_to_sort[arr_index] = i;
                 arr_index++;
             }
@@ -439,25 +475,32 @@ int compare(const void * x1, const void * x2)
         return ( *(int*)x1 - *(int*)x2 );
 }
 
-void to_left(size_t *num, size_t *left_num)
+// ИМХО, лучше без указателей.
+// Аргумент принимать по значенияю, а результат возвращать в return'е.
+// Ты же не пользуешься тем что здесь указатели.
+// В POSIX-интерфейсах указатели (на структуры) часто используются чтобы можно было структуру менять прозрачно для вызывающего кода.
+// В частности, чтобы не нужно было его перекомпилировать.
+// В C++ для этого используется идиома pointer to implementation (на эту тему тебе тоже пока не имеет смыл заморачиваться).
+// Ещё в POSIX-интерфейсах указатели на выходные значения используются, т.к. возвращаемые в return значения заняты под индикаторы ошибок.
+// Ну и в C++ лучше использовать ссылки там, где ты не ожидаешь nullptr.
+//
+// Имена to_left() и to_right() не очень информативные.
+// ИМХО, left/right_child_index() в контексте кучи понятнее.
+size_t left_child_index(size_t num)
 {
-    *left_num = *num << 1;
-    ++*left_num;
+    return (num << 1) + 1;
 }
 
-void to_right(size_t *num, size_t *right_num)
+size_t right_child_index(size_t num)
 {
-    *right_num = *num << 1;
-    *right_num += 2;
+    return (num << 1) + 2;
 }
 
 void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size)
 {
-    size_t left_i, right_i;
+    size_t left_i = left_child_index(index);
+    size_t right_i = right_child_index(index);
     size_t l_largest, r_largest, largest;
-
-    to_left(&index, &left_i);
-    to_right(&index, &right_i);
 
     if ((right_i <= heap_size) and (ar1[right_i] > ar1[index])) {
         largest = right_i;
@@ -470,13 +513,18 @@ void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size)
     }
 
     if (largest != index) {
-        if ((ar1[left_i] < ar1[right_i]) and (right_i <= heap_size)){
+        // Было: if ((ar1[left_i] < ar1[right_i]) and (right_i <= heap_size)){
+        // Это ошибка доступа к памяти.
+        // Ты сначала потенциально обратился за границу массива по индексу right_i, а потом уже сравнил этот индекс с верхней границей м ассива.
+        // and и or вычисляют свои аргументы слева направо
+        // И если первый аргумент позволяет дать ответ сразу, второй аргумент не вычисляется.
+        // Это используется в подобных случаях, но сначала надо проверить индекс, а потом уже индексироваться.
+        // (Кстати, тут неявно используется что left_i < right_i, чтобы left_i не сравнивать с heap_size.)
+        if ((right_i <= heap_size) and (ar1[left_i] < ar1[right_i])){
             largest = right_i;
         }
-        size_t tmp_el;
-        tmp_el = ar1[index];
-        ar1[index] = ar1[largest];
-        ar1[largest] = tmp_el;
+        // Есть специальная функция std::swap().
+        std::swap(ar1[index], ar1[largest]);
         max_heapify(ar1, largest, heap_size);
     }
 
@@ -484,49 +532,46 @@ void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size)
 
 void build_max_heap(std::vector<int>& array_heap)
 {
-    for (int i = (array_heap.size() - 1); i >= 0; i--) {
+    // Хитрый вариант для убывающего цикла по беззнаковой переменной (из-за желания индексировать типом size_t):
+    for (size_t i = array_heap.size(); i-- > 0; ) {
         max_heapify(array_heap, i, array_heap.size() - 1);
     }
 }
 
 void heapsort(std::vector<int>& array_to_sort)
 {
-    size_t array_size = array_to_sort.size();
+    // Внутри цикла array_size == i, так что можно обойтись без неё.
     build_max_heap(array_to_sort);
-    for (int i = array_to_sort.size() - 1; i >= 1; i--) {
-        size_t tmp_for_change;
-        tmp_for_change=array_to_sort[0];
-        array_to_sort[0] = array_to_sort[i];
-        array_to_sort[i] = tmp_for_change;
-        --array_size;
-        max_heapify(array_to_sort, 0, array_size - 1);
+    for (size_t i = array_to_sort.size(); i-- > 1; ) {
+        std::swap(array_to_sort[0], array_to_sort[i]);
+        max_heapify(array_to_sort, 0, i - 1);
 
     }
 }
 
-int partition(std::vector<int>& qsort_array, int start_i, int end_i)
+int partition(std::vector<int>& qsort_array, size_t start_i, size_t end_i)
 {
-    size_t base_element = qsort_array[end_i];
-    size_t tmp_for_change;
-    int left_i = start_i - 1;
+    // Каноническое название, кажется pivot.
+    // TODO: Лучше бы его рандомизировать.
+    size_t pivot = qsort_array[end_i];
+    // Лучше size_t.
+    // Ради него надо убрать '- 1', но без неё тоже лучше, так как не придётся после цикла 3 раза (!) добавлять эту единицу.
+    size_t left_i = start_i;
 
-    for (int j = start_i; j < end_i; j++) {
-        if (qsort_array[j] <= base_element) {
+    for (size_t j = start_i; j < end_i; j++) {
+        if (qsort_array[j] <= pivot) {
+            std::swap(qsort_array[j], qsort_array[left_i]);
             ++left_i;
-            tmp_for_change = qsort_array[j];
-            qsort_array[j] = qsort_array[left_i];
-            qsort_array[left_i] = tmp_for_change;
         }
     }
 
-    qsort_array[end_i] = qsort_array[left_i + 1];
-    qsort_array[left_i + 1] = base_element;
+    qsort_array[end_i] = qsort_array[left_i];
+    qsort_array[left_i] = pivot;
 
-    ++left_i;
     return left_i;
 }
 
-void quick_sort (std::vector<int>& qsort_array, int start_index, int end_index)
+void quick_sort (std::vector<int>& qsort_array, size_t start_index, size_t end_index)
 {
     if (start_index < end_index) {
         size_t mid_index = partition(qsort_array, start_index, end_index);
@@ -540,22 +585,30 @@ void counting_sort1(std::vector<int>& array_to_sort, size_t max_num)
     std::vector<int> counting_array(max_num, 0);
     std::vector<int> sorted_array(array_to_sort.size());
 
-    for (int i = 0; i < array_to_sort.size(); i++) {
+    // Для индексации массива лучше size_t:
+    // http://www.cplusplus.com/reference/cstring/size_t/
+    // http://en.wikipedia.org/wiki/C_data_types#Size_and_pointer_difference_types
+    // http://www.unix.org/whitepapers/64bit.html
+    //
+    // Тут на русском :-) :
+    // http://www.viva64.com/ru/t/0044/
+    // http://www.viva64.com/ru/a/0050/
+    for (size_t i = 0; i < array_to_sort.size(); i++) {
         ++counting_array[array_to_sort[i]];
     }
 
     int prev_count_arr_element = 0;
-    for (int i = 0; i < counting_array.size(); i++) {
+    for (size_t i = 0; i < counting_array.size(); i++) {
         counting_array[i] += prev_count_arr_element;
         prev_count_arr_element = counting_array[i];
     }
 
-    for (int i = 0; i < array_to_sort.size(); i++) {
+    for (size_t i = 0; i < array_to_sort.size(); i++) {
         sorted_array[counting_array[array_to_sort[i]] - 1] = array_to_sort[i];
         --counting_array[array_to_sort[i]];
     }
 
-    for (int i = 0; i < array_to_sort.size(); i++) {
+    for (size_t i = 0; i < array_to_sort.size(); i++) {
         array_to_sort[i] = sorted_array[i];
     }
 
