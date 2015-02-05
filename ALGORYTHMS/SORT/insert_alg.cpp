@@ -26,14 +26,19 @@ int merge_sort(std::vector<int>& ar1);
 //int counting_sort(int *array_to_sort, int ar_size);
 int counting_sort(std::vector<int>& array_to_sort, int ar_size); 
 
+//Heapsort
 void to_left(size_t *num, size_t *left_num);
 void to_right(size_t *num, size_t *right_num);
-//void max_heapify(std::vector<int>& ar1, size_t index);
 void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size);
 void build_max_heap(std::vector<int>& array_heap);
 void heapsort(std::vector<int>& array_to_sort);
+
+//Quick sort
 int partition(std::vector<int>& qsort_array, int start_i, int end_i);
 void quick_sort (std::vector<int>& qsort_array, int start_index, int end_index);
+
+//Couning sort
+void counting_sort1(std::vector<int>& array_to_sort, size_t max_num);
 
 // Простая функция проверки отсортированности массива по возрастанию.
 bool check_sorted(std::vector<int>& ar1) {
@@ -66,10 +71,16 @@ int main()
     // Тут наверное, имелось в виду time() (или лучше clock_gettime(), у которого разрешение выше).
     // Чтобы посеять реальное время, а не CPU-время от начала работы программы.
     // Которое слабо меняется от запуска к запуску.
-    srand( (unsigned)clock() );
+//    srand( (unsigned)clock() );
+    srand( (unsigned)time(NULL) );
+
+    size_t maxN;
+    struct timespec sort_start_time, sort_stop_time;
 
     std::cout << "Enter the buffer size: ";
     std::cin >> size;
+
+    maxN = size;
 
     // malloc() — это C, в C++ используется new и new[].
     // Они запустят конструкторы (т.е. инициализируют память) в отличие от malloc().
@@ -89,12 +100,14 @@ int main()
 
     std::vector<int> test_array_heap(size);
     std::vector<int> test_array_quicksort(size);
+    std::vector<int> test_counting_sort (size);
 
     for (i=0; i < size; i++) {
 //        arr1[i] = rand() % size;
         arr_to_sort[i] = arr4[i] = arr3[i] = arr2[i] = arr1[i] = rand() % size;
         test_array_heap[i] = arr4[i];
         test_array_quicksort[i] = arr4[i];
+        test_counting_sort[i] = arr4[i];
 //        arr2[i] = arr1[i];
 //        arr3[i] = arr1[i];
 //        arr4[i] = arr1[i];
@@ -113,38 +126,44 @@ int main()
     // "
     //
     // А в C++11 лучше всего использовать std::chrono: http://en.cppreference.com/w/cpp/chrono .
-    start_time = clock();
+
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
     insertion(arr1);
-    end_time = clock();
-    clock_t insertion_time = end_time - start_time;
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+    clock_t insertion_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
-    start_time = clock();
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
     merge_sort(arr2);
-    end_time = clock();
-    clock_t decompose_time = end_time - start_time;
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+    clock_t decompose_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
-    start_time = clock();
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
     counting_sort(arr3, size);
-    end_time = clock();
-    clock_t On_time = end_time - start_time;
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+    clock_t On_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
-    start_time = clock();
     // Если пишешь на C++, проще использовать std::sort.
     // У него и компаратор по умолчанию есть, свой писать не нужно.
 //    qsort(arr4, size, sizeof(int), compare);
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
     std::sort(arr_to_sort.begin(), arr_to_sort.end());
-    end_time = clock();
-    clock_t qsort_time = end_time - start_time;
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+    clock_t qsort_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
-    start_time = clock();
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
     heapsort(test_array_heap);
-    end_time = clock();
-    clock_t heap_time = end_time - start_time;
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+    clock_t heap_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
-    start_time = clock();
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
     quick_sort(test_array_quicksort,0,test_array_quicksort.size() - 1);
-    end_time = clock();
-    clock_t quicksort_time = end_time - start_time;
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+    clock_t quicksort_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
+
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
+    counting_sort1(test_counting_sort, maxN);
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+    clock_t counting_sort1_time = sort_stop_time.tv_nsec - sort_start_time.tv_nsec;
 
     std::cout << "Insertion Result : ";
     for (size_t k = 0; k < size; k++) {
@@ -157,7 +176,7 @@ int main()
       std::cout << "ERROR\n";
       return 1;
     }
-    std::cout << "Time : " << insertion_time << " (mls)\n";
+    std::cout << "Time : " << insertion_time << " (nsec)\n";
 
     std::cout << "\nDecompose Result : ";
     for (size_t k = 0; k < size; k++) {
@@ -170,7 +189,7 @@ int main()
       std::cout << "ERROR\n";
       return 1;
     }
-    std::cout << "Time : " << decompose_time << " (mls)\n";
+    std::cout << "Time : " << decompose_time << " (nsec)\n";
 
     std::cout << "\nO(n) sort Result : ";
     for (int k = 0; k < size; k++) {
@@ -183,7 +202,7 @@ int main()
       std::cout << "ERROR\n";
       return 1;
     }
-    std::cout << "Time : " << On_time << " (mls)\n";
+    std::cout << "Time : " << On_time << " (nsec)\n";
 
     std::cout << "\nC++ std::sort Result : ";
     for (int k = 0; k < size; k++) {
@@ -196,7 +215,7 @@ int main()
       std::cout << "ERROR\n";
       return 1;
     }
-    std::cout << "Time : " << qsort_time << " (mls)\n";
+    std::cout << "Time : " << qsort_time << " (nsec)\n";
 
     std::cout << "\nHeap sort Result : ";
     for (int k = 0; k < size; k++) {
@@ -209,7 +228,7 @@ int main()
       std::cout << "ERROR\n";
       return 1;
     }
-    std::cout << "Time : " << heap_time << " (mls)\n";
+    std::cout << "Time : " << heap_time << " (nsec)\n";
 
     std::cout << "\nQuicksort Result : ";
     for (int k = 0; k < size; k++) {
@@ -222,7 +241,20 @@ int main()
       std::cout << "ERROR\n";
       return 1;
     }
-    std::cout << "Time : " << quicksort_time << " (mls)\n";
+    std::cout << "Time : " << quicksort_time << " (nsec)\n";
+
+    std::cout << "\nCouning sort1 Result : ";
+    for (int k = 0; k < size; k++) {
+        std::cout <<  test_counting_sort[k] << " ";
+    }
+    std::cout << "\n";
+    if (check_sorted(test_counting_sort)) {
+      std::cout << "OK\n";
+    } else {
+      std::cout << "ERROR\n";
+      return 1;
+    }
+    std::cout << "Time : " << counting_sort1_time << " (nsec)\n";
 
 
     // Скорее стилистическая правка.
@@ -501,5 +533,31 @@ void quick_sort (std::vector<int>& qsort_array, int start_index, int end_index)
         quick_sort(qsort_array, start_index, mid_index - 1);
         quick_sort(qsort_array, mid_index + 1, end_index);
     }
+}
+
+void counting_sort1(std::vector<int>& array_to_sort, size_t max_num)
+{
+    std::vector<int> counting_array(max_num, 0);
+    std::vector<int> sorted_array(array_to_sort.size());
+
+    for (int i = 0; i < array_to_sort.size(); i++) {
+        ++counting_array[array_to_sort[i]];
+    }
+
+    int prev_count_arr_element = 0;
+    for (int i = 0; i < counting_array.size(); i++) {
+        counting_array[i] += prev_count_arr_element;
+        prev_count_arr_element = counting_array[i];
+    }
+
+    for (int i = 0; i < array_to_sort.size(); i++) {
+        sorted_array[counting_array[array_to_sort[i]] - 1] = array_to_sort[i];
+        --counting_array[array_to_sort[i]];
+    }
+
+    for (int i = 0; i < array_to_sort.size(); i++) {
+        array_to_sort[i] = sorted_array[i];
+    }
+
 }
 
