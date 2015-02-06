@@ -52,13 +52,11 @@ int merge_sort(std::vector<int>& ar1);
 int counting_sort(std::vector<int>& array_to_sort); 
 
 //Heapsort
-void max_heapify(std::vector<int>& ar1, size_t index, size_t heap_size);
-void build_max_heap(std::vector<int>& array_heap);
+// Декларации max_heapify() и build_max_heap() не нужны, так как эти функции определены до их использования.
 void heapsort(std::vector<int>& array_to_sort);
 
 //Quick sort
-int partition(std::vector<int>& qsort_array, int start_i, int end_i);
-void quick_sort (std::vector<int>& qsort_array, int start_index, int end_index);
+void quick_sort (std::vector<int>& qsort_array, size_t start_index, size_t end_index); // Поправил s/int/size_t/ в опредении, но забыл поправить декларацию. (Лишнее подтверждение принципа Don't Repeat Yourself ;-)  )
 
 //Couning sort
 void counting_sort1(std::vector<int>& array_to_sort, size_t max_num);
@@ -553,7 +551,7 @@ int partition(std::vector<int>& qsort_array, size_t start_i, size_t end_i)
 {
     // Каноническое название, кажется pivot.
     // TODO: Лучше бы его рандомизировать.
-    size_t pivot = qsort_array[end_i];
+    int pivot = qsort_array[end_i]; // А!!! Я тут тип ошибочно менял. Он должен быть того же типа, что и элементы массива.
     // Лучше size_t.
     // Ради него надо убрать '- 1', но без неё тоже лучше, так как не придётся после цикла 3 раза (!) добавлять эту единицу.
     size_t left_i = start_i;
