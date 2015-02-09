@@ -546,7 +546,8 @@ void quick_sort (std::vector<int>& qsort_array, size_t start_index, size_t end_i
 {
     if (start_index < end_index) {
         size_t mid_index = partition(qsort_array, start_index, end_index);
-        quick_sort(qsort_array, start_index, mid_index - 1);
+        if (mid_index > 0)
+            quick_sort(qsort_array, start_index, mid_index - 1);
         quick_sort(qsort_array, mid_index + 1, end_index);
     }
 }
