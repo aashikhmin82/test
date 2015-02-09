@@ -236,8 +236,8 @@ int main()
     currItem = currItem->next;
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
-//    radix_sort(test_radix_sort, MaxDigitsNum);
-    radix_sort(test_radix_sort, 4);
+    radix_sort(test_radix_sort, MaxDigitsNum);
+//    radix_sort(test_radix_sort, 4);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
     insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Radix sort");
     currItem = currItem->next;
@@ -633,9 +633,9 @@ void radix_sort(std::vector<int>& array_to_sort, size_t digits_num)
     // Не уверен в использовании size_t, т.к. дальше деление int'ов
     int digit_order = 1;
     for(size_t j = 0; j < digits_num; j++) {
-        digit_order *= 10;
         std::cout << "Dig order : " << digit_order << "\n";
         radix_sort_digit(array_to_sort, digit_order);
+        digit_order *= 10;
     }
 }
 
@@ -646,7 +646,13 @@ void radix_sort_digit(std::vector<int>& array_to_sort, int n)
     std::vector<int> sorted_array(array_to_sort.size());
 
     for (size_t i = 0; i < array_to_sort.size(); i++) {
-        digit = array_to_sort[i] % n;
+        int digit_tmp = array_to_sort[i] / n;
+        if (digit_tmp == 0) {
+            digit = 0;
+        } else {
+            digit = digit_tmp % 10;
+        }
+
         ++counting_array[digit];
     }
 
@@ -656,8 +662,16 @@ void radix_sort_digit(std::vector<int>& array_to_sort, int n)
         prev_count_arr_element = counting_array[i];
     }
 
-    for (size_t i = 0; i < array_to_sort.size(); i++) {
-        digit = array_to_sort[i] % n;
+//    for (size_t i = 0; i < array_to_sort.size(); i++) {
+    size_t i = array_to_sort.size();
+    while (i > 0) {
+        --i;
+        int digit_tmp = array_to_sort[i] / n;
+        if (digit_tmp == 0) {
+            digit = 0;
+        } else {
+            digit = digit_tmp % 10;
+        }
         sorted_array[counting_array[digit] - 1] = array_to_sort[i];
         --counting_array[digit];
     }
