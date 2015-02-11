@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <map>
 #include <vector>
 #include <algorithm>
 #include <bitset>
@@ -76,16 +77,11 @@ bool check_sorted(std::vector<int>& ar1) {
 
 int compare(const void * x1, const void * x2);
 
-//Linked-lists
-struct sort_time
-{
-    clock_t func_duration;
-    std::string sort_name;
-    sort_time *next;
-};
-void insertItem(sort_time *time_list, clock_t start_time, clock_t stop_time, std::string sortT);
-void printNode(sort_time *startItem);
-void sortByLinks(sort_time *startItem);
+typedef std::multimap<clock_t, std::string> profile_t;
+// Style: лучше либо все имена писать через подчерк, либо все в CamelCase.
+// Мне больше нравится первый вариант, так как в стандартной библиотеке используется он.
+void insertItem(profile_t& profile, clock_t start_time, clock_t stop_time, std::string sortT);
+void printNode(const profile_t& profile);
 
 int main() 
 {
@@ -186,27 +182,22 @@ int main()
     //
     // А в C++11 лучше всего использовать std::chrono: http://en.cppreference.com/w/cpp/chrono .
 
-    sort_time *startItem = new sort_time,
-         *currItem = startItem;
-    startItem->next = startItem;
+    profile_t profile;
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     insertion(arr1);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Insert sort");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Insert sort");
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     merge_sort(arr2);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Merge sort");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Merge sort");
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     counting_sort(arr3);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Counting sort");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Counting sort");
 
     // Если пишешь на C++, проще использовать std::sort.
     // У него и компаратор по умолчанию есть, свой писать не нужно.
@@ -214,33 +205,28 @@ int main()
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     std::sort(arr_to_sort.begin(), arr_to_sort.end());
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "C++ std::sort");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "C++ std::sort");
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     heapsort(test_array_heap);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Heap sort");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Heap sort");
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     quick_sort(test_array_quicksort,0,test_array_quicksort.size() - 1);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Quick sort");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Quick sort");
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     counting_sort1(test_counting_sort, maxN);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Counting sort1");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Counting sort1");
 
     clock_gettime(CLOCK_REALTIME, &sort_start_time);
     radix_sort(test_radix_sort, MaxDigitsNum);
 //    radix_sort(test_radix_sort, 4);
     clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Radix sort");
-    currItem = currItem->next;
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Radix sort");
 
     sort_check(arr1, "Insertion Result"); 
     sort_check(arr2, "Merge sort"); 
@@ -251,8 +237,7 @@ int main()
     sort_check(test_counting_sort, "Counting sort1"); 
     sort_check(test_radix_sort, "Radix sort"); 
 
-    sortByLinks(startItem);
-    printNode(startItem);
+    printNode(profile);
 
     // Скорее стилистическая правка.
     // return из main() — это то же самое, что и exit(0), но не акцентирует на себе внимание.
@@ -586,19 +571,15 @@ void counting_sort1(std::vector<int>& array_to_sort, size_t max_num)
 
 }
 
-void insertItem(sort_time *time_list, clock_t start_time, clock_t stop_time, std::string sortT)
+void insertItem(profile_t& profile, clock_t start_time, clock_t stop_time, std::string sortT)
 {
-    sort_time *item = new sort_time;
-    item->func_duration = stop_time - start_time;
-    item->sort_name = sortT;
-    item->next = time_list->next;
-    time_list->next = item;
+    profile.insert(std::make_pair(stop_time - start_time, sortT));
 }
 
-void printNode(sort_time *startItem)
+void printNode(const profile_t& profile)
 {
-        for (sort_time *i = startItem->next; i != startItem; i = i->next)
-                    std::cout << i->func_duration << " : " << i->sort_name << "\n";
+    for (profile_t::const_iterator i = profile.begin(); i != profile.end(); ++i)
+        std::cout << i->first << " : " << i->second << "\n";
 }
 
 void sort_check(std::vector<int>& sorted_array, std::string sortT) 
@@ -614,19 +595,6 @@ void sort_check(std::vector<int>& sorted_array, std::string sortT)
       std::cout << "ERROR\n";
       exit(1);
     }
-}
-
-void sortByLinks(sort_time *startItem)
-{
-    for (sort_time *i = startItem->next; i != startItem; i = i->next)
-        for (sort_time *j = startItem; j->next->next != startItem; j = j->next)
-            if (j->next->func_duration > j->next->next->func_duration) {
-                sort_time *buf = j->next;
-                j->next = j->next->next;
-                i = j->next;
-                buf->next = j->next->next;
-                j->next->next = buf;
-            }
 }
 
 void radix_sort(std::vector<int>& array_to_sort, size_t digits_num)
