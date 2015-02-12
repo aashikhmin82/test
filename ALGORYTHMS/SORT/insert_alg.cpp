@@ -45,25 +45,27 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp) {
 //    Передавая по отдельности можно случайно передать размер не того блока.
 //    Или, например, постоянная ошибка при вызове memset() — перепутать размер блока и символ, которым этот блок надо заполнить.
 //    С единым объектом этого не произойдёт.
-int insertion(std::vector<int>& ar1);
+void insertion(std::vector<int>& ar1);
 // Стандартное название алгоритма — merge sort.
-int merge_sort(std::vector<int>& ar1);
+void merge_sort(std::vector<int>& ar1);
 // Стандартное название алгоритма — counting sort.
 //int counting_sort(int *array_to_sort, int ar_size);
-int counting_sort(std::vector<int>& array_to_sort); 
+void counting_sort(std::vector<int>& array_to_sort);
 
 //Heapsort
 // Декларации max_heapify() и build_max_heap() не нужны, так как эти функции определены до их использования.
 void heapsort(std::vector<int>& array_to_sort);
 
 //Quick sort
-void quick_sort (std::vector<int>& qsort_array, size_t start_index, size_t end_index); // Поправил s/int/size_t/ в опредении, но забыл поправить декларацию. (Лишнее подтверждение принципа Don't Repeat Yourself ;-)  )
+void quick_sort (std::vector<int>& qsort_array); // Поправил s/int/size_t/ в опредении, но забыл поправить декларацию. (Лишнее подтверждение принципа Don't Repeat Yourself ;-)  )
 
 //Couning sort
-void counting_sort1(std::vector<int>& array_to_sort, size_t max_num);
+void counting_sort1(std::vector<int>& array_to_sort);
+
+void std_sort(std::vector<int>& array);
 
 //Radix sort (counting)
-void radix_sort(std::vector<int>& array_to_sort, size_t digits_num);
+void radix_sort(std::vector<int>& array_to_sort);
 void radix_sort_digit(std::vector<int>& array_to_sort, int n);
 
 // Простая функция проверки отсортированности массива по возрастанию.
@@ -82,6 +84,10 @@ typedef std::multimap<clock_t, std::string> profile_t;
 // Мне больше нравится первый вариант, так как в стандартной библиотеке используется он.
 void insertItem(profile_t& profile, clock_t start_time, clock_t stop_time, std::string sortT);
 void printNode(const profile_t& profile);
+
+typedef void (*algorithm_t)(std::vector<int>&);
+//void test_algorithm(algorithm_t algorithm, std::string name, const std::vector<int> &array, sort_time *currItem);
+void test_algorithm(algorithm_t algorithm, std::string name, const std::vector<int> &array, profile_t& profile);
 
 int main() 
 {
@@ -112,13 +118,8 @@ int main()
 //    srand( (unsigned)clock() );
     srand( (unsigned)time(NULL) );
 
-    size_t maxN;
-    struct timespec sort_start_time, sort_stop_time;
-
     std::cout << "Enter the buffer size: ";
     std::cin >> size;
-
-    maxN = size;
 
     // malloc() — это C, в C++ используется new и new[].
     // Они запустят конструкторы (т.е. инициализируют память) в отличие от malloc().
@@ -129,44 +130,11 @@ int main()
     // Такой менеджер сам освободит ресурс автоматически в своём деструкторе.
     // Страуструп называет такой подход RAII (Resource Acquisition Is Initialization).
     std::vector<int> arr1(size);
-    std::vector<int> arr_to_sort(size);
-    std::vector<int> arr2(size);
-    std::vector<int> arr3(size);
-    std::vector<int> arr4(size);
-//    int *arr3 = (int *) malloc (size * sizeof(int));
-//    int *arr4 = new int [size];
 
-    std::vector<int> test_array_heap(size);
-    std::vector<int> test_array_quicksort(size);
-    std::vector<int> test_counting_sort (size);
-    std::vector<int> test_radix_sort (size);
-
-    int MaxInt = 0;
     for (i=0; i < size; i++) {
-//        arr1[i] = rand() % size;
-        arr_to_sort[i] = arr4[i] = arr3[i] = arr2[i] = arr1[i] = rand() % size;
-        test_array_heap[i] = arr4[i];
-        test_array_quicksort[i] = arr4[i];
-        test_counting_sort[i] = arr4[i];
-        test_radix_sort[i] = arr4[i];
-        if (MaxInt < arr4[i]) {
-            MaxInt = arr4[i];
-        }
-//        arr2[i] = arr1[i];
-//        arr3[i] = arr1[i];
-//        arr4[i] = arr1[i];
+        arr1[i] = rand() % size;
 //        cout << arr1[i] << ' ';
     }
-    std::cout << '\n';
-    std::cout << "MAX INT : " << MaxInt << "\n";
-
-    size_t MaxDigitsNum = 0;
-    while(MaxInt > 0)
-    {
-        MaxInt /= 10;
-        ++MaxDigitsNum;
-    }
-    std::cout << "MAX Digigs : " << MaxDigitsNum << "\n";
 
 
 
@@ -184,58 +152,14 @@ int main()
 
     profile_t profile;
 
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    insertion(arr1);
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Insert sort");
-
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    merge_sort(arr2);
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Merge sort");
-
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    counting_sort(arr3);
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Counting sort");
-
-    // Если пишешь на C++, проще использовать std::sort.
-    // У него и компаратор по умолчанию есть, свой писать не нужно.
-//    qsort(arr4, size, sizeof(int), compare);
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    std::sort(arr_to_sort.begin(), arr_to_sort.end());
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "C++ std::sort");
-
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    heapsort(test_array_heap);
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Heap sort");
-
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    quick_sort(test_array_quicksort,0,test_array_quicksort.size() - 1);
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Quick sort");
-
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    counting_sort1(test_counting_sort, maxN);
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Counting sort1");
-
-    clock_gettime(CLOCK_REALTIME, &sort_start_time);
-    radix_sort(test_radix_sort, MaxDigitsNum);
-//    radix_sort(test_radix_sort, 4);
-    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
-    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, "Radix sort");
-
-    sort_check(arr1, "Insertion Result"); 
-    sort_check(arr2, "Merge sort"); 
-    sort_check(arr3, "Counting sort"); 
-    sort_check(arr_to_sort, "C++ std::sort"); 
-    sort_check(test_array_heap, "Heap sort"); 
-    sort_check(test_array_quicksort, "Quick sort"); 
-    sort_check(test_counting_sort, "Counting sort1"); 
-    sort_check(test_radix_sort, "Radix sort"); 
+    test_algorithm(insertion, "Insert sort", arr1, profile);
+    test_algorithm(merge_sort, "Merge sort", arr1, profile);
+    test_algorithm(counting_sort, "Couning sort", arr1, profile);
+    test_algorithm(std_sort, "C++ std::sort", arr1, profile);
+    test_algorithm(heapsort, "Heap sort", arr1, profile);
+    test_algorithm(quick_sort, "Quick sort", arr1, profile);
+    test_algorithm(counting_sort1, "Counting sort1", arr1, profile);
+    test_algorithm(radix_sort, "Radix sort", arr1, profile);
 
     printNode(profile);
 
@@ -251,7 +175,28 @@ int main()
     // А вот vector и умные указатели (uniq_ptr, shared_ptr) сами освободят память при выходе из блока (фигурных скобок), где они были определены.
 }
 
-int insertion(std::vector<int>& ar1) 
+void test_algorithm(algorithm_t algorithm, std::string name, const std::vector<int> &array, profile_t& profile)
+{
+    struct timespec sort_start_time, sort_stop_time;
+    std::vector<int> array_copy = array;
+
+    clock_gettime(CLOCK_REALTIME, &sort_start_time);
+    algorithm(array_copy);
+    clock_gettime(CLOCK_REALTIME, &sort_stop_time);
+
+    sort_check(array_copy, name + " Result");
+
+//    insertItem(currItem, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, name);
+    insertItem(profile, sort_start_time.tv_nsec, sort_stop_time.tv_nsec, name);
+ //   currItem = currItem->next;
+}
+
+void std_sort(std::vector<int>& array)
+{
+    std::sort(array.begin(), array.end());
+}
+
+void insertion(std::vector<int>& ar1)
 {
 
     size_t k;
@@ -291,10 +236,9 @@ int insertion(std::vector<int>& ar1)
 
     // Вроде не пользуешься возвращаемым значением, да и функция всегда возвращает 1.
     // Имеет смысл выкинуть return'ы и объявить что функция возвращает void.
-    return 1;
 }
 
-int merge_sort(std::vector<int>& ar1) 
+void merge_sort(std::vector<int>& ar1)
 {
 
     size_t new_size1 = ar1.size() / 2;
@@ -384,12 +328,10 @@ int merge_sort(std::vector<int>& ar1)
     }
     cout << "\n";
     */
-
-    return 1;
 }
 
 //int counting_sort(int *array_to_sort, int ar_size) 
-int counting_sort(std::vector<int>& array_to_sort)
+void counting_sort(std::vector<int>& array_to_sort)
 {
     // ar_size не удачное имя параметра, лучше max_value.
     // Но я бы вообще обошёлся без него.
@@ -420,8 +362,6 @@ int counting_sort(std::vector<int>& array_to_sort)
             }
         }
     }
-
-    return 1;
 }
 
 int compare(const void * x1, const void * x2) 
@@ -537,8 +477,19 @@ void quick_sort (std::vector<int>& qsort_array, size_t start_index, size_t end_i
     }
 }
 
-void counting_sort1(std::vector<int>& array_to_sort, size_t max_num)
+void quick_sort (std::vector<int>& qsort_array)
 {
+    // Случай пустого массива раньше (без проверки) приводил к падению.
+    if (qsort_array.size() > 0)
+        quick_sort(qsort_array, 0, qsort_array.size() - 1);
+}
+
+void counting_sort1(std::vector<int>& array_to_sort)
+{
+    // Надо бы честно вычислить max_num.
+    // Я просто взял его таким же, каким он передавался сюда раньше.
+    int max_num = array_to_sort.size();
+
     std::vector<int> counting_array(max_num, 0);
     std::vector<int> sorted_array(array_to_sort.size());
 
@@ -597,11 +548,34 @@ void sort_check(std::vector<int>& sorted_array, std::string sortT)
     }
 }
 
-void radix_sort(std::vector<int>& array_to_sort, size_t digits_num)
+void radix_sort(std::vector<int>& array_to_sort)
 {
+    int MaxInt = 0;
+    for (size_t i=0; i < array_to_sort.size(); i++) {
+        if (array_to_sort[i] < 0)
+        {
+            std::cerr << "radix_sort does not support negative values (for now)\n";
+            exit(1);
+        }
+
+        if (MaxInt < array_to_sort[i]) {
+            MaxInt = array_to_sort[i];
+        }
+    }
+    std::cout << '\n';
+    std::cout << "MAX INT : " << MaxInt << "\n";
+
+    size_t MaxDigitsNum = 0;
+    while(MaxInt > 0)
+    {
+        MaxInt /= 10;
+        ++MaxDigitsNum;
+    }
+    std::cout << "MAX Digigs : " << MaxDigitsNum << "\n";
+
     // Не уверен в использовании size_t, т.к. дальше деление int'ов
     int digit_order = 1;
-    for(size_t j = 0; j < digits_num; j++) {
+    for(size_t j = 0; j < MaxDigitsNum; j++) {
         std::cout << "Dig order : " << digit_order << "\n";
         radix_sort_digit(array_to_sort, digit_order);
         digit_order *= 10;
