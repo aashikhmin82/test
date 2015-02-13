@@ -61,12 +61,17 @@ void quick_sort (std::vector<int>& qsort_array); // Поправил s/int/size_
 
 //Couning sort
 void counting_sort1(std::vector<int>& array_to_sort);
-
 void std_sort(std::vector<int>& array);
 
 //Radix sort (counting)
 void radix_sort(std::vector<int>& array_to_sort);
 void radix_sort_digit(std::vector<int>& array_to_sort, int n);
+
+//Bucket sort
+void bucket_sort(std::vector<int>& sort_array);
+void print_vec(std::vector<int>& array, std::vector<int>& sorted_array, size_t &ar_index);
+void insert_element_to_bucket(std::vector<int>& array, int element);
+void bucket_merge(std::vector< std::vector<int> >& sorted_bucket, std::vector<int>& sorted_array, size_t rows);
 
 // Простая функция проверки отсортированности массива по возрастанию.
 void sort_check(std::vector<int>& sorted_array, std::string sortT); 
@@ -160,6 +165,7 @@ int main()
     test_algorithm(quick_sort, "Quick sort", arr1, profile);
     test_algorithm(counting_sort1, "Counting sort1", arr1, profile);
     test_algorithm(radix_sort, "Radix sort", arr1, profile);
+    test_algorithm(bucket_sort, "Bucket sort", arr1, profile);
 
     printNode(profile);
 
@@ -623,5 +629,54 @@ void radix_sort_digit(std::vector<int>& array_to_sort, int n)
         array_to_sort[i] = sorted_array[i];
     }
 
+}
+
+void bucket_sort(std::vector<int>& sort_array)
+{
+        const size_t ROWS = 10;
+//        size_t ROWS = sort_array.size() / 10; //Maximum 10 numbers in one bucket
+        size_t interval = sort_array.size() / (ROWS - 1);
+        size_t interval_i;
+        std::vector< std::vector<int> > bucket_array(ROWS, std::vector<int>());
+
+        for (size_t j = 0; j < sort_array.size(); j++) {
+            interval_i = sort_array[j] / interval;
+
+            insert_element_to_bucket(bucket_array[interval_i], sort_array[j]);
+
+        }
+
+        bucket_merge(bucket_array, sort_array, ROWS);
+}
+
+void insert_element_to_bucket(std::vector<int>& array, int element)
+{
+    size_t k;
+    if (array.size() == 0) {
+        array.push_back(element);
+    } else {
+        std::vector<int>::iterator it;
+        it = array.begin();
+        for (k = 0; k < array.size(); k++) {
+            if (array[k] >= element) {
+                array.insert(it + k, element);
+                break;
+            }
+        }
+        if (k == array.size()) {
+            array.push_back(element);
+        }
+    }
+}
+
+void bucket_merge(std::vector< std::vector<int> >& sorted_bucket, std::vector<int>& sorted_array, size_t rows)
+{
+    size_t ar_index = 0;
+    for (size_t k = 0; k < rows; k++) {
+        for (size_t j = 0; j < sorted_bucket[k].size(); ++j) {
+            sorted_array[ar_index] = sorted_bucket[k][j];
+            ++ar_index;
+        }
+    }
 }
 
