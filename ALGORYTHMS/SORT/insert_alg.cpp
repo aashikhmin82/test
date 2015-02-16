@@ -69,13 +69,16 @@ void radix_sort_digit(std::vector<int>& array_to_sort, int n);
 
 //Bucket sort
 void bucket_sort(std::vector<int>& sort_array);
-void print_vec(std::vector<int>& array, std::vector<int>& sorted_array, size_t &ar_index);
+//void print_vec(std::vector<int>& array, std::vector<int>& sorted_array, size_t &ar_index); // Не используется
 void insert_element_to_bucket(std::vector<int>& array, int element);
-void bucket_merge(std::vector< std::vector<int> >& sorted_bucket, std::vector<int>& sorted_array, size_t rows);
+// Если функция не меняет входные данные (переданные по ссылкам или указателям), лучше пометить их константными.
+// Это важное свойство интерфейса, которое достойно быть выделено синтаксически.
+// Аргумент rows лишний, так как rows == sorted_bucket.size()
+void bucket_merge(const std::vector< std::vector<int> >& sorted_bucket, std::vector<int>& sorted_array);
 
 // Простая функция проверки отсортированности массива по возрастанию.
-void sort_check(std::vector<int>& sorted_array, std::string sortT); 
-bool check_sorted(std::vector<int>& ar1) {
+void sort_check(const std::vector<int>& sorted_array, std::string sortT); 
+bool check_sorted(const std::vector<int>& ar1) {
   for (size_t i = 0; i + 1 < ar1.size(); ++i)
     if (ar1[i] > ar1[i + 1])
       return false;
@@ -539,7 +542,7 @@ void printNode(const profile_t& profile)
         std::cout << i->first << " : " << i->second << "\n";
 }
 
-void sort_check(std::vector<int>& sorted_array, std::string sortT) 
+void sort_check(const std::vector<int>& sorted_array, std::string sortT) 
 {
     std::cout << sortT << " : ";
     for (size_t k = 0; k < sorted_array.size(); k++) {
@@ -633,11 +636,13 @@ void radix_sort_digit(std::vector<int>& array_to_sort, int n)
 
 void bucket_sort(std::vector<int>& sort_array)
 {
-        const size_t ROWS = 10;
-//        size_t ROWS = sort_array.size() / 10; //Maximum 10 numbers in one bucket
+//        const size_t ROWS = 10;
+        // С большим ROWS он быстрее работает.
+        size_t ROWS = sort_array.size() / 10; // 10 numbers in one bucket on average.
         size_t interval = sort_array.size() / (ROWS - 1);
         size_t interval_i;
-        std::vector< std::vector<int> > bucket_array(ROWS, std::vector<int>());
+        // Если нужна инициализация элементов вектора конструктором по умолчанию, можно явно его не писать.
+        std::vector< std::vector<int> > bucket_array(ROWS);
 
         for (size_t j = 0; j < sort_array.size(); j++) {
             interval_i = sort_array[j] / interval;
@@ -646,7 +651,7 @@ void bucket_sort(std::vector<int>& sort_array)
 
         }
 
-        bucket_merge(bucket_array, sort_array, ROWS);
+        bucket_merge(bucket_array, sort_array);
 }
 
 void insert_element_to_bucket(std::vector<int>& array, int element)
@@ -655,11 +660,11 @@ void insert_element_to_bucket(std::vector<int>& array, int element)
     if (array.size() == 0) {
         array.push_back(element);
     } else {
-        std::vector<int>::iterator it;
-        it = array.begin();
+        // 'it' использовался только в одном месте, можно было просто написать 'array.insert(array.begin() + k, element);'.
+        // Или проходить по массиву не индексом, а итератором.
         for (k = 0; k < array.size(); k++) {
             if (array[k] >= element) {
-                array.insert(it + k, element);
+                array.insert(array.begin() + k, element);
                 break;
             }
         }
@@ -669,10 +674,10 @@ void insert_element_to_bucket(std::vector<int>& array, int element)
     }
 }
 
-void bucket_merge(std::vector< std::vector<int> >& sorted_bucket, std::vector<int>& sorted_array, size_t rows)
+void bucket_merge(const std::vector< std::vector<int> >& sorted_bucket, std::vector<int>& sorted_array)
 {
     size_t ar_index = 0;
-    for (size_t k = 0; k < rows; k++) {
+    for (size_t k = 0; k < sorted_bucket.size(); k++) {
         for (size_t j = 0; j < sorted_bucket[k].size(); ++j) {
             sorted_array[ar_index] = sorted_bucket[k][j];
             ++ar_index;
