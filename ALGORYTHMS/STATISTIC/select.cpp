@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -12,13 +13,12 @@ void select_max_min (const std::vector<size_t>& statistics);
 
 //Random select i-value
 void randomized_select(std::vector<size_t>& statistics, size_t start_i, size_t end_i, size_t search_i);
-size_t partition(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i);
+size_t partition(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i, size_t index = std::numeric_limits<size_t>::max());
 
 //Select i-value
 void select_by_index(std::vector<size_t>& statistics, size_t start_i, size_t end_i, size_t search_i);
 size_t median_arrary_search(const std::vector<size_t>& statistics, std::vector<size_t>& median_array_indx);
 void insert_sort(const std::vector<size_t>& statistics, std::vector<size_t>& array_to_insert_indx, size_t index);
-size_t partition2(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i, size_t index);
 
 //Output result create
 typedef std::multimap<std::chrono::duration<double>, std::string> profile_t;
@@ -154,9 +154,11 @@ void randomized_select(std::vector<size_t>& statistics, size_t start_i, size_t e
 
 }
 
-size_t partition(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i)
+size_t partition(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i, size_t index)
 {
-    size_t index = (rand() % (end_i - start_i + 1)) + start_i;
+    if (index == std::numeric_limits<size_t>::max())
+        index = (rand() % (end_i - start_i + 1)) + start_i;
+
     std::swap(qsort_array[index], qsort_array[end_i]);
     size_t pivot = qsort_array[end_i];
     size_t left_i = start_i;
@@ -187,7 +189,7 @@ void select_by_index(std::vector<size_t>& statistics, size_t start_i, size_t end
 
     median_arrary_search(statistics, mediana_array_indx);
 
-    pivot_median = partition2(statistics,start_i, end_i, mediana_array_indx[0]);
+    pivot_median = partition(statistics,start_i, end_i, mediana_array_indx[0]);
 
     if (pivot_median == search_i) {
         std::cout << "Found! Search i : " << search_i << "  -> Value : " << statistics[search_i] << "\n";
@@ -250,24 +252,4 @@ void insert_sort(const std::vector<size_t>& statistics, std::vector<size_t>& arr
             array_to_insert_indx.push_back(index);
         }
     }
-}
-
-size_t partition2(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i, size_t index)
-{
-    std::swap(qsort_array[index], qsort_array[end_i]);
-    size_t pivot = qsort_array[end_i];
-    size_t left_i = start_i;
-
-    for (size_t j = start_i; j < end_i; j++) {
-        if (qsort_array[j] <= pivot) {
-            std::swap(qsort_array[j], qsort_array[left_i]);
-            ++left_i;
-        }
-    }
-
-
-    qsort_array[end_i] = qsort_array[left_i];
-    qsort_array[left_i] = pivot;
-
-    return left_i;
 }
