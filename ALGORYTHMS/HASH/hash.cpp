@@ -9,18 +9,21 @@
 size_t letter_size = 26;
 char letter_heap[] = "abcdefghijklmnopqrstuvwxyz";
 std::vector<std::string> string_array;
-std::vector< std::vector<std::string> > hash1_array;
+std::vector< std::vector<std::string> > work_hash_array;
 //std::vector< std::vector<std::string> > hash_by_divis_array;
 
 size_t hash_div(size_t str_num, size_t m);
+size_t hash_multiplic(size_t str_num, size_t m);
 size_t str_to_size_t (std::string string, size_t max_letters);
 
 //Create hash 
 void create_hash_div_arr(std::vector< std::vector<std::string> >& hash_by_divis_array);
+void create_hash_multiplication_arr(std::vector< std::vector<std::string> >& hash_by_divis_array);
 
 //Search
 size_t ordinary_search(std::string search_string);
 size_t hash_div_search(std::string search_string);
+size_t hash_multiplic_search(std::string search_string);
 
 //Output result create
 typedef std::multimap<std::chrono::duration<double>, std::string> profile_t;
@@ -30,6 +33,9 @@ void insert_to_timing_result(profile_t& profile, std::string sortT, std::chrono:
 
 //Print final result
 void print_timing_result(const profile_t& profile);
+
+//Debug
+void hash_debug_output(std::vector< std::vector<std::string> >& hash_array, std::string hash_name);
 
 int main()
 {
@@ -55,36 +61,61 @@ int main()
     std::vector< std::vector<std::string> > hash_by_divis_array(size);
 
     //Hash array create
-    //Hash by division
+//Hash by division
     create_hash_div_arr(hash_by_divis_array);
 
     //DEBUG
-    if (size < 30) {
-        for (size_t i = 0; i < size; i++) {
-            std::cout << i << " : ";
-            for (size_t j = 0; j < hash_by_divis_array[i].size(); ++j) {
-                std::cout << hash_by_divis_array[i][j] << " ";
-            }
-            std::cout << "\n";
-        }
-    }
-
-    hash1_array = hash_by_divis_array;
-    hash_by_divis_array.clear();
+    hash_debug_output(hash_by_divis_array, "Hash by division");
 
     std::string search_string; 
     std::cout << "Enter the string to search : ";
     std::cin >> search_string;
+
+    work_hash_array = hash_by_divis_array;
+    hash_by_divis_array.clear();
 
     //Search
     profile_t profile;
     test_search_algorithm(ordinary_search, "Ordinary search", profile, search_string);
     test_search_algorithm(hash_div_search, "Div Hash search", profile, search_string);
 
+    work_hash_array.clear();
+////////////////////////////////////
+
+// Multiplication
+    std::vector< std::vector<std::string> > hash_by_divis_array1(size);
+    create_hash_multiplication_arr(hash_by_divis_array1);
+
+    //DEBUG
+    hash_debug_output(hash_by_divis_array1, "Hash by multiplication");
+
+    work_hash_array = hash_by_divis_array1;
+    hash_by_divis_array1.clear();
+    test_search_algorithm(hash_multiplic_search, "Muliplication Hash search", profile, search_string);
+
+    work_hash_array.clear();
+////////////////////////////////////////////
+
     print_timing_result(profile);
 
     return 0;
 }
+
+void hash_debug_output(std::vector< std::vector<std::string> >& hash_array, std::string hash_name)
+{
+    if (hash_array.size() < 30) {
+//        std::cout << "Hash by multiplication : \n";
+        std::cout << hash_name << " : \n";
+        for (size_t i = 0; i < hash_array.size(); i++) {
+            std::cout << i << " : ";
+            for (size_t j = 0; j < hash_array[i].size(); ++j) {
+                std::cout << hash_array[i][j] << " ";
+            }
+            std::cout << "\n";
+        }
+    }
+}
+
 
 void test_search_algorithm(algorithm_t algorithm, std::string name, profile_t& profile, std::string search_string)
 {
@@ -162,10 +193,10 @@ size_t hash_div_search(std::string search_string)
 {
     std::cout << "[Debug] HASH1 : ";
     size_t str_num = str_to_size_t(search_string,letter_size);
-    size_t chain_index = hash_div(str_num,hash1_array.size());
+    size_t chain_index = hash_div(str_num,work_hash_array.size());
 
-        for (size_t j = 0; j < hash1_array[chain_index].size(); ++j) {
-            if (search_string == hash1_array[chain_index][j]) {
+        for (size_t j = 0; j < work_hash_array[chain_index].size(); ++j) {
+            if (search_string == work_hash_array[chain_index][j]) {
                 std::cout << "\n";
                 std::cout << "Found in hash!\n";
                 return 1;
@@ -175,3 +206,42 @@ size_t hash_div_search(std::string search_string)
     
     return 0;
 }
+
+void create_hash_multiplication_arr(std::vector< std::vector<std::string> >& hash_by_divis_array)
+{
+    size_t str_num;
+    for (size_t i = 0; i < hash_by_divis_array.size(); i++)
+    {
+        str_num = str_to_size_t(string_array[i],letter_size);
+        hash_by_divis_array[hash_multiplic(str_num,hash_by_divis_array.size())].push_back(string_array[i]);
+    }
+}
+
+size_t hash_multiplic(size_t str_num, size_t m)
+{
+    float A = 0.618;
+    size_t hash_num;
+
+    hash_num = m * fmod((str_num * A),1);
+
+    return hash_num;
+}
+
+size_t hash_multiplic_search(std::string search_string)
+{
+    std::cout << "[Debug] HASH2 : ";
+    size_t str_num = str_to_size_t(search_string,letter_size);
+    size_t chain_index = hash_multiplic(str_num,work_hash_array.size());
+
+    for (size_t j = 0; j < work_hash_array[chain_index].size(); ++j) {
+        if (search_string == work_hash_array[chain_index][j]) {
+            std::cout << "\n";
+            std::cout << "Found in hash2!\n";
+            return 1;
+        }
+    }
+    std::cout << "\n";
+
+    return 0;
+}
+
