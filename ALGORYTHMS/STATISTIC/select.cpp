@@ -5,26 +5,35 @@
 #include <ctime>
 #include <map>
 #include <chrono>
+#include <random>
+#include <algorithm>
+#include <iterator>
+
+using namespace std;
+using std::chrono::duration;
+using std::chrono::system_clock;
 
 //g++ -std=c++11 select.cpp -o <some_file>
 
+typedef std::vector<size_t> vector_t;
+
 //Select min and max values
-void select_max_min (const std::vector<size_t>& statistics);
+void select_max_min (const vector_t& statistics);
 
 //Random select i-value
-void randomized_select(std::vector<size_t>& statistics, size_t start_i, size_t end_i, size_t search_i);
-size_t partition(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i, size_t index = std::numeric_limits<size_t>::max());
+void randomized_select(vector_t& statistics, size_t start_i, size_t end_i, size_t search_i);
+size_t partition(vector_t& qsort_array, size_t start_i, size_t end_i, size_t index = std::numeric_limits<size_t>::max());
 
 //Select i-value
-void select_by_index(std::vector<size_t>& statistics, size_t start_i, size_t end_i, size_t search_i);
-size_t median_arrary_search(const std::vector<size_t>& statistics, std::vector<size_t>& median_array_indx);
-void insert_sort(const std::vector<size_t>& statistics, std::vector<size_t>& array_to_insert_indx, size_t index);
+void select_by_index(vector_t& statistics, size_t start_i, size_t end_i, size_t search_i);
+size_t median_array_search(const vector_t& statistics, vector_t& median_array_index);
+void insert_sort(const vector_t& statistics, vector_t& array_to_insert_index, size_t index);
 
 //Output result create
 typedef std::multimap<std::chrono::duration<double>, std::string> profile_t;
-typedef void (*algorithm_t)(std::vector<size_t>&, size_t, size_t, size_t);
-void test_select_algorithm(algorithm_t algorithm, std::string name, const std::vector<size_t> &array, profile_t& profile, size_t search_index);
-void insert_to_timing_result(profile_t& profile, std::string sortT, std::chrono::duration<double> elapsed_seconds);
+typedef void (*algorithm_t)(vector_t&, size_t, size_t, size_t);
+void test_select_algorithm(algorithm_t algorithm, std::string name, const vector_t &array, profile_t& profile, size_t search_index);
+void insert_to_timing_result(profile_t& profile, std::string algorithm_name, duration<double> elapsed_seconds);
 
 //Print final result
 void print_timing_result(const profile_t& profile);
@@ -34,29 +43,29 @@ int main()
     size_t size;
     size_t search_index;
 
-    srand( (unsigned)time(NULL) );
+    srand( static_cast<int>(time(nullptr)) );
 
     std::cout << "Enter the array size : ";
     std::cin >> size;
 
 //Initialize array with values
-    std::vector<size_t> test_array (size);
+    vector_t test_array (size);
     for (size_t i = 0; i < test_array.size(); i++) 
     {
         test_array[i] = i;
     }
 
 //Random mixing of the array
-    for (size_t i = 0; i < test_array.size(); i++) 
-    {
-        std::swap(test_array[i], test_array[rand() % size]);
-    }
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    std::shuffle(test_array.begin(), test_array.end(), g);
 
 //Output of the array
     std::cout << "Test Array : ";
-    for (size_t i = 0; i < test_array.size(); i++) 
+    for (auto test_array_value : test_array) 
     {
-        std::cout << test_array[i] << " ";
+        std::cout << test_array_value << " ";
     }
     std::cout << "\n";
 
@@ -74,32 +83,31 @@ int main()
     return 0;
 }
 
-void test_select_algorithm(algorithm_t algorithm, std::string name, const std::vector<size_t> &array, profile_t& profile, size_t search_index)
+void test_select_algorithm(algorithm_t algorithm, std::string name, const vector_t &array, profile_t& profile, size_t search_index)
 {
-    std::chrono::time_point<std::chrono::system_clock> select_start_time, select_end_time;
-    std::vector<size_t> array_copy = array;
+    vector_t array_copy = array;
 
-    select_start_time = std::chrono::system_clock::now();
+    auto select_start_time = system_clock::now();
     algorithm(array_copy, 0, array_copy.size() - 1, search_index);
-    select_end_time = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = select_end_time - select_start_time;
+    auto select_end_time = system_clock::now();
+    duration<double> elapsed_seconds = select_end_time - select_start_time;
 
     insert_to_timing_result(profile, name, elapsed_seconds);
 }
 
-void insert_to_timing_result(profile_t& profile, std::string sortT, std::chrono::duration<double> elapsed_seconds)
+void insert_to_timing_result(profile_t& profile, std::string algorithm_name, duration<double> elapsed_seconds)
 {
-        profile.insert(std::make_pair(elapsed_seconds, sortT));
+        profile.insert(std::make_pair(elapsed_seconds, algorithm_name));
 }
 
 void print_timing_result(const profile_t& profile)
 {
     std::cout << "\n"; 
-    for (profile_t::const_iterator i = profile.begin(); i != profile.end(); ++i)
-        std::cout << i->first.count() << "s : " << i->second << "\n";
+    for (const auto& i : profile)
+        std::cout << i.first.count() << "s : " << i.second << "\n";
 }
 
-void select_max_min (const std::vector<size_t>& statistics)
+void select_max_min (const vector_t& statistics)
 {
     size_t max_val_index, min_val_index;
     size_t start_i;
@@ -118,28 +126,23 @@ void select_max_min (const std::vector<size_t>& statistics)
     }
 
     for (size_t i = start_i; i < statistics.size(); i+=2) {
-        if (statistics[i] > statistics[i+1]) {
-            if (statistics[i] > statistics[max_val_index]) {
-                max_val_index = i;
-            }
-            if (statistics[i+1] < statistics[min_val_index]) {
-                min_val_index = i + 1;
-            }
-        } else {
-            if (statistics[i+1] > statistics[max_val_index]) {
-                max_val_index = i + 1;
-            }
-            if (statistics[i] < statistics[min_val_index]) {
-                min_val_index = i;
-            }
+        size_t j = i, k = i + 1;
+        if (statistics[j] < statistics[k]) {
+            std::swap(j,k);
         }
+            if (statistics[j] > statistics[max_val_index]) {
+                max_val_index = j;
+            }
+            if (statistics[k] < statistics[min_val_index]) {
+                min_val_index = k;
+            }
     }
 
     std::cout << "Min value : " << statistics[min_val_index] << "\tIndex : " << min_val_index << "\n";
     std::cout << "Max value : " << statistics[max_val_index] << "\tIndex : " << max_val_index << "\n";
 }
 
-void randomized_select(std::vector<size_t>& statistics, size_t start_i, size_t end_i, size_t search_i)
+void randomized_select(vector_t& statistics, size_t start_i, size_t end_i, size_t search_i)
 {
     size_t divis_i;
     
@@ -154,7 +157,7 @@ void randomized_select(std::vector<size_t>& statistics, size_t start_i, size_t e
 
 }
 
-size_t partition(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i, size_t index)
+size_t partition(vector_t& qsort_array, size_t start_i, size_t end_i, size_t index)
 {
     if (index == std::numeric_limits<size_t>::max())
         index = (rand() % (end_i - start_i + 1)) + start_i;
@@ -177,19 +180,19 @@ size_t partition(std::vector<size_t>& qsort_array, size_t start_i, size_t end_i,
     return left_i;
 }
 
-void select_by_index(std::vector<size_t>& statistics, size_t start_i, size_t end_i, size_t search_i)
+void select_by_index(vector_t& statistics, size_t start_i, size_t end_i, size_t search_i)
 {
     size_t pivot_median;
 
-    std::vector<size_t> mediana_array_indx;
+    vector_t median_array_index;
 
     for (size_t i = start_i; i <= end_i; i++) {
-        mediana_array_indx.push_back(i);
+        median_array_index.push_back(i);
     }
 
-    median_arrary_search(statistics, mediana_array_indx);
+    median_array_search(statistics, median_array_index);
 
-    pivot_median = partition(statistics,start_i, end_i, mediana_array_indx[0]);
+    pivot_median = partition(statistics,start_i, end_i, median_array_index[0]);
 
     if (pivot_median == search_i) {
         std::cout << "Found! Search i : " << search_i << "  -> Value : " << statistics[search_i] << "\n";
@@ -202,54 +205,54 @@ void select_by_index(std::vector<size_t>& statistics, size_t start_i, size_t end
 
 }
 
-size_t median_arrary_search(const std::vector<size_t>& statistics, std::vector<size_t>& median_array_indx) 
+size_t median_array_search(const vector_t& statistics, vector_t& median_array_index) 
 {
-    if (median_array_indx.size() == 1) {
+    if (median_array_index.size() == 1) {
         return 1;
     }
     size_t j = 0;
-    std::vector<size_t> array_for_five_indx;
-    std::vector<size_t> median_array_indx_tmp;
+    vector_t array_for_five_index;
+    vector_t median_array_index_tmp;
 
-    for (size_t i = 0; i < median_array_indx.size(); i++) {
-        insert_sort(statistics, array_for_five_indx, median_array_indx[i]);
+    for (size_t i = 0; i < median_array_index.size(); i++) {
+        insert_sort(statistics, array_for_five_index, median_array_index[i]);
 
-        if (array_for_five_indx.size() == 5) {
-            median_array_indx_tmp.push_back(array_for_five_indx[2]);
+        if (array_for_five_index.size() == 5) {
+            median_array_index_tmp.push_back(array_for_five_index[2]);
             ++j;
-            array_for_five_indx.clear();
+            array_for_five_index.clear();
         }
     }
 
-    if (array_for_five_indx.size() != 0) {
-        if (array_for_five_indx.size() == 1) {
-            median_array_indx_tmp.push_back(array_for_five_indx[0]);
+    if (array_for_five_index.size() != 0) {
+        if (array_for_five_index.size() == 1) {
+            median_array_index_tmp.push_back(array_for_five_index[0]);
         } else {
-            median_array_indx_tmp.push_back(array_for_five_indx[(array_for_five_indx.size() / 2) - 1 + (array_for_five_indx.size() % 2)]);
+            median_array_index_tmp.push_back(array_for_five_index[(array_for_five_index.size() / 2) - 1 + (array_for_five_index.size() % 2)]);
         }
     }
-    median_array_indx = median_array_indx_tmp;
+    median_array_index = median_array_index_tmp;
 
-    median_arrary_search(statistics, median_array_indx); 
+    median_array_search(statistics, median_array_index); 
 
     return 1;
 
 }
 
-void insert_sort(const std::vector<size_t>& statistics, std::vector<size_t>& array_to_insert_indx, size_t index)
+void insert_sort(const vector_t& statistics, vector_t& array_to_insert_index, size_t index)
 {
     size_t k;
-    if (array_to_insert_indx.size() == 0) {
-        array_to_insert_indx.push_back(index);
+    if (array_to_insert_index.size() == 0) {
+        array_to_insert_index.push_back(index);
     } else {
-        for (k = 0; k < array_to_insert_indx.size(); k++) {
-            if (statistics[array_to_insert_indx[k]] >= statistics[index]) {
-                array_to_insert_indx.insert(array_to_insert_indx.begin() + k, index);
+        for (k = 0; k < array_to_insert_index.size(); k++) {
+            if (statistics[array_to_insert_index[k]] >= statistics[index]) {
+                array_to_insert_index.insert(array_to_insert_index.begin() + k, index);
                 break;
             }
         }
-        if (k == array_to_insert_indx.size()) {
-            array_to_insert_indx.push_back(index);
+        if (k == array_to_insert_index.size()) {
+            array_to_insert_index.push_back(index);
         }
     }
 }
