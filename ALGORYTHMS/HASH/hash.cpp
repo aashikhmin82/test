@@ -21,6 +21,11 @@ vec_string_1d_t string_array;
 vec_string_2d_t work_hash_array;
 //vec_string_2d_t hash_by_divis_array;
 
+//Params for universal hash
+size_t max_str_val, param_a, param_b;
+void create_universal_hash_arr(vec_string_2d_t& hash_by_divis_array);
+size_t hash_universal(size_t str_num, size_t m);
+
 size_t hash_div(size_t str_num, size_t m);
 size_t hash_multiplic(size_t str_num, size_t m);
 size_t str_to_size_t (std::string string, size_t max_letters);
@@ -33,6 +38,7 @@ void create_hash_multiplication_arr(vec_string_2d_t& hash_by_divis_array);
 size_t ordinary_search(std::string search_string);
 size_t hash_div_search(std::string search_string);
 size_t hash_multiplic_search(std::string search_string);
+size_t hash_universal_search(std::string search_string);
 
 //Output result create
 typedef std::multimap<duration<double>, std::string> profile_t;
@@ -67,6 +73,11 @@ int main()
 
         string_array.push_back(str_rnd);
     }
+
+//Params for Universal hash
+   max_str_val = str_to_size_t ("zzzzzz", letter_size);
+   param_a = rand() % (max_str_val - 1);
+   param_b = (rand() % (max_str_val - 2)) + 1;
 
     vec_string_2d_t hash_by_divis_array(size);
 
@@ -106,6 +117,20 @@ int main()
     work_hash_array.clear();
 ////////////////////////////////////////////
 
+// Universal Hash
+    vec_string_2d_t hash_by_divis_array2(size);
+    create_universal_hash_arr(hash_by_divis_array2);
+
+    //DEBUG
+    hash_debug_output(hash_by_divis_array2, "Universal Hash");
+
+    work_hash_array = hash_by_divis_array2;
+    hash_by_divis_array2.clear();
+    test_search_algorithm(hash_universal_search, "Universal Hash search", profile, search_string);
+
+    work_hash_array.clear();
+///////////////////////////////////////////
+
     print_timing_result(profile);
 
     return 0;
@@ -114,7 +139,7 @@ int main()
 void hash_debug_output(vec_string_2d_t& hash_array, std::string hash_name)
 {
     if (hash_array.size() < 30) {
-        std::cout << hash_name << " : \n";
+        std::cout << "\n" << hash_name << " : \n";
         for (size_t i = 0; i < hash_array.size(); i++) {
             std::cout << i << " : ";
             for (auto hash_element : hash_array[i]) {
@@ -242,6 +267,43 @@ size_t hash_multiplic_search(std::string search_string)
     for (auto chain_element : work_hash_array[chain_index]) {
         if (search_string == chain_element) {
             std::cout << "\nFound in hash2!\n";
+            return 1;
+        }
+    }
+    std::cout << "\n";
+
+    return 0;
+}
+
+
+void create_universal_hash_arr(vec_string_2d_t& hash_by_divis_array)
+{
+    size_t str_num;
+    for (size_t i = 0; i < hash_by_divis_array.size(); i++)
+    {
+        str_num = str_to_size_t(string_array[i],letter_size);
+        hash_by_divis_array[hash_universal(str_num,hash_by_divis_array.size())].push_back(string_array[i]);
+    }
+}
+
+size_t hash_universal(size_t str_num, size_t m)
+{
+    size_t hash_num;
+
+    hash_num = fmod ( fmod((param_a * str_num + param_b ),max_str_val), m);
+
+    return hash_num;
+}
+
+size_t hash_universal_search(std::string search_string)
+{
+    std::cout << "[Debug] HASH3 : ";
+    size_t str_num = str_to_size_t(search_string,letter_size);
+    size_t chain_index = hash_universal(str_num,work_hash_array.size());
+
+    for (auto chain_element : work_hash_array[chain_index]) {
+        if (search_string == chain_element) {
+            std::cout << "\nFound in hash3!\n";
             return 1;
         }
     }
