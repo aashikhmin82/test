@@ -19,6 +19,7 @@ typedef std::vector< vec_string_1d_t > vec_string_2d_t;
 vec_string_1d_t string_array;
 //vec_string_2d_t work_hash_array;
 vec_string_2d_t work_hash_array;
+vec_string_1d_t work_hash_array_1d;
 //vec_string_2d_t hash_by_divis_array;
 
 //Params for universal hash
@@ -29,16 +30,19 @@ size_t hash_universal(size_t str_num, size_t m);
 size_t hash_div(size_t str_num, size_t m);
 size_t hash_multiplic(size_t str_num, size_t m);
 size_t str_to_size_t (std::string string, size_t max_letters);
+size_t hash_linear(size_t str_num, const vec_string_1d_t& linear_hash_array, std::string search_string);
 
 //Create hash 
 void create_hash_div_arr(vec_string_2d_t& hash_by_divis_array);
 void create_hash_multiplication_arr(vec_string_2d_t& hash_by_divis_array);
+void create_linear_hash_arr(vec_string_1d_t& linear_hash_array);
 
 //Search
 size_t ordinary_search(std::string search_string);
 size_t hash_div_search(std::string search_string);
 size_t hash_multiplic_search(std::string search_string);
 size_t hash_universal_search(std::string search_string);
+size_t linear_hash_search(std::string search_string);
 
 //Output result create
 typedef std::multimap<duration<double>, std::string> profile_t;
@@ -51,6 +55,7 @@ void print_timing_result(const profile_t& profile);
 
 //Debug
 void hash_debug_output(vec_string_2d_t& hash_array, std::string hash_name);
+void hash_debug_output_1d(vec_string_1d_t& hash_array, std::string hash_name);
 
 int main()
 {
@@ -75,7 +80,7 @@ int main()
     }
 
 //Params for Universal hash
-   max_str_val = str_to_size_t ("zzzzzz", letter_size);
+   max_str_val = str_to_size_t ("zzzzzz", letter_size); //Depends on Initialize array with values ((rand() % 5) + 1)
    param_a = rand() % (max_str_val - 1);
    param_b = (rand() % (max_str_val - 2)) + 1;
 
@@ -131,6 +136,22 @@ int main()
     work_hash_array.clear();
 ///////////////////////////////////////////
 
+//Linear enquiry
+    size_t size_log = log2(size);
+    size_t linear_hash_size = pow(2, size_log + 1);
+    vec_string_1d_t linear_hash(linear_hash_size,"0");
+    
+    create_linear_hash_arr(linear_hash);
+
+    //DEBUG
+    hash_debug_output_1d(linear_hash, "Linear enquire Hash");
+
+    work_hash_array_1d = linear_hash;
+    linear_hash.clear();
+    test_search_algorithm(linear_hash_search, "Linear enquire Hash search", profile, search_string);
+
+//////////////////////////////////////////
+
     print_timing_result(profile);
 
     return 0;
@@ -150,6 +171,19 @@ void hash_debug_output(vec_string_2d_t& hash_array, std::string hash_name)
     }
 }
 
+void hash_debug_output_1d(vec_string_1d_t& hash_array, std::string hash_name)
+{
+    size_t i = 0;
+    if (hash_array.size() < 30) {
+        std::cout << "\n" << hash_name << " : \n";
+        for (auto hash_element : hash_array) {
+            std::cout << i << " : ";
+            std::cout << hash_element << "\n";
+            ++i;
+        }
+        std::cout << "\n";
+    }
+}
 
 void test_search_algorithm(algorithm_t algorithm, std::string name, profile_t& profile, std::string search_string)
 {
@@ -223,13 +257,13 @@ size_t ordinary_search(std::string search_string)
 
 size_t hash_div_search(std::string search_string)
 {
-    std::cout << "[Debug] HASH1 : ";
+    std::cout << "[Debug] Division hash : ";
     size_t str_num = str_to_size_t(search_string,letter_size);
     size_t chain_index = hash_div(str_num,work_hash_array.size());
 
         for (auto chain_element : work_hash_array[chain_index]) {
             if (search_string == chain_element) {
-                std::cout << "\nFound in hash!\n";
+                std::cout << "\nFound in Division hash!\n";
                 return 1;
             }
         }
@@ -260,13 +294,13 @@ size_t hash_multiplic(size_t str_num, size_t m)
 
 size_t hash_multiplic_search(std::string search_string)
 {
-    std::cout << "[Debug] HASH2 : ";
+    std::cout << "[Debug] Multiplication hash : ";
     size_t str_num = str_to_size_t(search_string,letter_size);
     size_t chain_index = hash_multiplic(str_num,work_hash_array.size());
 
     for (auto chain_element : work_hash_array[chain_index]) {
         if (search_string == chain_element) {
-            std::cout << "\nFound in hash2!\n";
+            std::cout << "\nFound in multiplication hash!\n";
             return 1;
         }
     }
@@ -297,13 +331,13 @@ size_t hash_universal(size_t str_num, size_t m)
 
 size_t hash_universal_search(std::string search_string)
 {
-    std::cout << "[Debug] HASH3 : ";
+    std::cout << "[Debug] Univeral hash : ";
     size_t str_num = str_to_size_t(search_string,letter_size);
     size_t chain_index = hash_universal(str_num,work_hash_array.size());
 
     for (auto chain_element : work_hash_array[chain_index]) {
         if (search_string == chain_element) {
-            std::cout << "\nFound in hash3!\n";
+            std::cout << "\nFound in universal hash!\n";
             return 1;
         }
     }
@@ -311,4 +345,43 @@ size_t hash_universal_search(std::string search_string)
 
     return 0;
 }
+
+void create_linear_hash_arr(vec_string_1d_t& linear_hash_array)
+{
+    size_t str_num;
+    for (size_t i = 0; i < string_array.size(); i++)
+    {
+        str_num = str_to_size_t(string_array[i],letter_size);
+        linear_hash_array[hash_linear(str_num, linear_hash_array, "no_such_string")] = string_array[i];
+    }
+}
+
+size_t hash_linear(size_t str_num, const vec_string_1d_t& linear_hash_array, std::string search_string)
+{
+    size_t hash_num_temp, hash_num;
+
+    hash_num_temp = fmod((param_a * str_num + param_b ),max_str_val);
+    for (size_t i = 0; i < linear_hash_array.size(); ++i) {
+        hash_num = fmod ( (hash_num_temp + i), linear_hash_array.size());
+        if ((linear_hash_array[hash_num] == "0") or (linear_hash_array[hash_num] == search_string)) {
+            return hash_num;
+        } 
+    }
+
+    return hash_num;
+}
+
+size_t linear_hash_search(std::string search_string)
+{
+    std::cout << "[Debug] linear hash : ";
+    size_t str_num = str_to_size_t(search_string,letter_size);
+    if (work_hash_array_1d[hash_linear(str_num, work_hash_array_1d, search_string)] == search_string) {
+        std::cout << search_string << " : Found in linear hash!\n";
+    } else {
+        std::cout << "NOT found in linear hash.\n";
+    }
+
+    return 0;
+}
+
 
