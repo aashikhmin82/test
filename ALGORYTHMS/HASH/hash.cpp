@@ -43,6 +43,22 @@ size_t hash_linear(
         const double& param_b, 
         const size_t& max_str_val);
 
+size_t hash_quadratic(
+        const size_t& str_num, 
+        const vec_string_1d_t& open_addr_hash_array, 
+        const std::string& search_string, 
+        const double& param_a, 
+        const double& param_b, 
+        const size_t& max_str_val);
+
+size_t hash_double(
+        const size_t& str_num, 
+        const vec_string_1d_t& open_addr_hash_array, 
+        const std::string& search_string, 
+        const double& param_a, 
+        const double& param_b, 
+        const size_t& max_str_val);
+
 //Convert string to size_t
 size_t str_to_size_t (
         const std::string& string, 
@@ -312,6 +328,46 @@ class Linear_Hash : public Open_Address_Hash
 
 };
 
+class Quadratic_Hash : public Open_Address_Hash
+{
+    private:
+        size_t quadratic_hash_size_cl;
+
+    public:
+        Quadratic_Hash(Initial_Vars &main_vars)
+        {
+            description = "[CLASS NEW Debug] Quadratic enquire Hash";
+            size_t size_log_cl = log2(main_vars.string_array.size());
+            quadratic_hash_size_cl = pow(2, size_log_cl + 1);
+            vec_string_1d_t quadratic_hash_tmp(quadratic_hash_size_cl,"0");
+            hash_array = quadratic_hash_tmp;
+            param_a = (rand() % (main_vars.max_str_val - 2)) + 1;
+            param_b = rand() % (main_vars.max_str_val - 1);
+            hash_type = hash_quadratic;
+        }
+
+};
+
+class Double_Hash : public Open_Address_Hash
+{
+    private:
+        size_t double_hash_size_cl;
+
+    public:
+        Double_Hash(Initial_Vars &main_vars)
+        {
+            description = "[CLASS NEW Debug] Linear enquire Hash";
+            size_t size_log_cl = log2(main_vars.string_array.size());
+            double_hash_size_cl = pow(2, size_log_cl + 1);
+            vec_string_1d_t double_hash_tmp(double_hash_size_cl,"0");
+            hash_array = double_hash_tmp;
+            param_a = (rand() % (main_vars.max_str_val - 2)) + 1;
+            param_b = rand() % (main_vars.max_str_val - 1);
+            hash_type = hash_double;
+        }
+
+};
+
 int main()
 {
     size_t letter_size = 26;
@@ -394,6 +450,22 @@ int main()
    obj_Linear_Hash.debug_output();
    std::cout << "Search in Linear Hash : \n";
    obj_Linear_Hash.hash_search(obj_main_vars, "[CLASS] Linear enquire Hash search", profile);
+   //////////////////////////////////////////
+
+   //Quadratic enquiry
+   Quadratic_Hash obj_Quadratic_Hash(obj_main_vars);
+   obj_Quadratic_Hash.create_hash_arr(obj_main_vars);
+   obj_Quadratic_Hash.debug_output();
+   std::cout << "Search in Quadratic Hash : \n";
+   obj_Quadratic_Hash.hash_search(obj_main_vars, "[CLASS] Quadratic enquire Hash search", profile);
+   //////////////////////////////////////////
+
+   //Double enquiry
+   Double_Hash obj_Double_Hash(obj_main_vars);
+   obj_Double_Hash.create_hash_arr(obj_main_vars);
+   obj_Double_Hash.debug_output();
+   std::cout << "Search in Double Hash : \n";
+   obj_Double_Hash.hash_search(obj_main_vars, "[CLASS] Double enquire Hash search", profile);
    //////////////////////////////////////////
 
     print_timing_result(profile);
@@ -519,6 +591,51 @@ size_t hash_linear(
     return hash_num;
 }
 
+size_t hash_quadratic(
+        const size_t& str_num, 
+        const vec_string_1d_t& open_addr_hash_array, 
+        const std::string& search_string, 
+        const double& param_a, 
+        const double& param_b, 
+        const size_t& max_str_val)
+{
+    size_t hash_num_temp, hash_num;
+    double const_c1 = 0.5;
+    double const_c2 = 0.5;
+
+    hash_num_temp = fmod((param_a * str_num + param_b ),max_str_val);
+    for (size_t i = 0; i < open_addr_hash_array.size(); ++i) {
+        hash_num = fmod ( (hash_num_temp + const_c1 * i + const_c2 * i * i), open_addr_hash_array.size());
+        if ((open_addr_hash_array[hash_num] == "0") or (open_addr_hash_array[hash_num] == search_string)) {
+            return hash_num;
+        } 
+    }
+
+    return hash_num;
+}
+
+size_t hash_double(
+        const size_t& str_num, 
+        const vec_string_1d_t& open_addr_hash_array, 
+        const std::string& search_string, 
+        const double& param_a, 
+        const double& param_b, 
+        const size_t& max_str_val)
+{
+    size_t hash_num_temp, hash_num_temp1, hash_num;
+
+    hash_num_temp = fmod(str_num, open_addr_hash_array.size());
+    hash_num_temp1 = 1 + fmod(str_num, open_addr_hash_array.size() - 1);
+    for (size_t i = 0; i < open_addr_hash_array.size(); ++i) {
+        hash_num = fmod ( hash_num_temp + i * hash_num_temp1, open_addr_hash_array.size());
+        if ((open_addr_hash_array[hash_num] == "0") or (open_addr_hash_array[hash_num] == search_string)) {
+            return hash_num;
+        } 
+    }
+
+    return hash_num;
+}
+
 void create_hash_with_chain(
         const hash_with_chain_func_t& hash_type, 
         const vec_string_1d_t& string_array, 
@@ -588,8 +705,8 @@ void search_in_open_addr_hash(
 //    std::cout << "[Debug Class] linear hash : ";
     size_t str_num = str_to_size_t(search_string, letter_size);
     if (open_addr_hash_array[hash_func(str_num, open_addr_hash_array, search_string, param_a, param_b, max_str_val)] == search_string) {
-        std::cout << search_string << " : Found in linear hash!\n";
+        std::cout << search_string << " : Found in hash!\n";
     } else {
-        std::cout << "NOT found in linear hash.\n";
+        std::cout << "NOT found in hash.\n";
     }
 }
