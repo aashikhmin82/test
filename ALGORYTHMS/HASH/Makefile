@@ -1,3 +1,4 @@
-CXXFLAGS = -std=c++11 -Wall -Weffc++
+CXXFLAGS = -std=c++11 -Wall -Weffc++ -O3
 
-all: hash
+all: hash2
+	./hash2 10000 5
