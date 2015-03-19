@@ -73,6 +73,7 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
             element_num = element_num * 2;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
             root->left = bin_tree_element;
+            bin_tree_element->up = root;
         } 
         else 
         {
@@ -88,6 +89,7 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
             element_num = element_num * 2 + 1;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
             root->right = bin_tree_element;
+            bin_tree_element->up = root;
         } 
         else 
         {
@@ -120,6 +122,7 @@ void help()
         << "\tadd_value : Enter the size_t value to the tree.\n"
         << "\tmin_value : Print Min value.\n"
         << "\tmax_value : Print Max value.\n"
+        << "\tsearch_value : Search value.\n"
         << "\tprint_tree : Output the Tree.\n" 
         << "\texit : to exit" << endl;
 }
@@ -138,6 +141,27 @@ void select_min_value(const Bin_Tree_Element *root)
         select_min_value(root->left);
     else
         cout << "MIN Value : " << root->element << endl;
+}
+
+void tree_search(const Bin_Tree_Element *root, size_t search_el = 0)
+{
+    if (search_el == 0)
+    {
+        cout << "Enter the value to search : ";
+        cin >> search_el;
+    }
+
+    if (root == NULL)
+        cout << "Not found!" << endl;
+    else if (root->element == search_el)
+        cout << "Found : " << root->element << "\t Colour : " << root->colour << endl;
+    else
+    {
+        if (root->element > search_el)
+            tree_search(root->left, search_el);
+        else
+            tree_search(root->right, search_el);
+    }
 }
 
 size_t nrand(size_t n)
@@ -200,6 +224,7 @@ int main()
     funcs["print_tree"] = [&tree_output_func]() { print_tree_f(tree_output_func); };
     funcs["min_value"] = [&first]() { select_min_value(first); };
     funcs["max_value"] = [&first]() { select_max_value(first); };
+    funcs["search_value"] = [&first]() { tree_search(first); };
     funcs["exit"] = []() { exit(1); };
 
     string f_name;
