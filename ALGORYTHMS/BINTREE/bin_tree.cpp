@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <cmath>
 #include <map>
@@ -164,6 +166,100 @@ void tree_search(const Bin_Tree_Element *root, size_t search_el = 0)
     }
 }
 
+string node_name(const Bin_Tree_Element *node, const string& prefix = "")
+{
+    ostringstream out;
+    out << '"' << prefix << node << '"';
+    return out.str();
+}
+
+void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, size_t level, map<string, bool>& already_printed)
+{
+    out << "  " << name << " [rank = " << level;
+    if (already_printed[name])
+        out << ", color = \"grey\", fontcolor = \"grey\"";
+    out << ", label = \"";
+    if (node)
+        out << node->element << "\", shape = box]\n";
+    else
+        out << "null\"]\n";
+    already_printed[name] = true;
+}
+
+void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& already_printed)
+{
+    out << "  " << from << " -> " << to;
+    if (already_printed[from + to])
+        out << " [color = \"grey\"]";
+    out << '\n';
+    already_printed[from + to] = true;
+}
+
+string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, map<string, bool>& already_printed)
+{
+    string name = node_name(node);
+
+    dump_node(out, name, node, level, already_printed);
+
+    if (node)
+    {
+        string left_child;
+        string right_child;
+
+        if (node->left)
+            left_child = dump_node_dot(out, node->left, level + 1, already_printed);
+        else
+        {
+            /* Это нужно чтобы узел "null" в графе был не один общий, а свой в каждом месте. */
+            left_child = node_name(node, "left_null_child_of_");
+            dump_node(out, left_child, node->left, level + 1, already_printed);
+        }
+
+        if (node->right)
+            right_child = dump_node_dot(out, node->right, level + 1, already_printed);
+        else
+        {
+            right_child = node_name(node, "right_null_child_of_");
+            dump_node(out, right_child, node->right, level + 1, already_printed);
+        }
+
+        dump_edge(out, name, left_child, already_printed);
+        dump_edge(out, name, right_child, already_printed);
+    }
+
+    return name;
+}
+
+void dump_tree_dot(const Bin_Tree_Element *root)
+{
+    static map<string, bool> already_printed;
+    /*
+     * Лучше:
+     * 1) set, но так запись проверки проще и естественней.
+     * 2) Завести по отдельному контейнеру для узлов и рёбер, но я решил не усложнять.
+     * 3) Наверное, стоит обойтись без static, принимая этот контейнер снаружи или переделав это всё в класс.
+     *
+     * И ещё, этот метод, в паре с идентификацией узлов по их адресам в памяти,
+     * работает нестабильно при освобождении-перевыделении памяти под узлы.
+     * Так как новый узел может получить адрес старого (уже напечатанного и потом удалённого).
+     * Тогда он будет ошибочно напечатан серым цветом, как будто он старый.
+     */
+
+    fstream out("tree.dot", fstream::out | fstream::app);
+    out << "digraph {\n";
+    dump_node_dot(out, root, 0, already_printed);
+    out << "}\n\n";
+    out.close();
+    system("dot -Tpdf tree.dot > tree.pdf"); /* Тут используется пакет graphviz. */
+    cout << "Dumped to tree.dot and tree.pdf .\n";
+    /*
+     * Выбрал PDF, потому что в нём на каждой странице будет по графу –
+     * файл tree.dot каждый раз открывается на дозапись.
+     * В картиночных форматах печатается только первый граф.
+     * А в PDF можно смотреть как дерево меняется после проводимых над ним операций.
+     */
+}
+
 size_t nrand(size_t n)
 {
     const size_t bucket_size = RAND_MAX / n;
@@ -222,6 +318,7 @@ int main()
     funcs["help"] = []() {  help(); };
     funcs["add_value"] = [&first, &tree_output_func]() { add_value(first, tree_output_func); };
     funcs["print_tree"] = [&tree_output_func]() { print_tree_f(tree_output_func); };
+    funcs["dump"] = [&first]() { dump_tree_dot(first); };
     funcs["min_value"] = [&first]() { select_min_value(first); };
     funcs["max_value"] = [&first]() { select_max_value(first); };
     funcs["search_value"] = [&first]() { tree_search(first); };
