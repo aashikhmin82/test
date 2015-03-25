@@ -9,6 +9,8 @@
 
 using namespace std;
 
+static bool const treat_moved_node_like_new = true;
+
 class Bin_Tree_Element
 {
     public:
@@ -211,40 +213,60 @@ void tree_search(const Bin_Tree_Element *root, size_t search_el = 0)
     }
 }
 
-string node_name(const Bin_Tree_Element *node, const string& prefix = "")
+string node_name(const Bin_Tree_Element *node, const Bin_Tree_Element* parent = nullptr, const string& which_child = "")
 {
     ostringstream out;
-    out << '"' << prefix << node << '"';
+    out << '"' << node;
+    if (parent)
+    {
+        out << ',';
+        if (which_child.empty())
+            out << (parent->left == node ? "left" : "right");
+        else
+            out << which_child;
+        out << "_child_of_" << parent;
+    }
+    out << '"';
     return out.str();
 }
 
-void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, size_t level, map<string, bool>& already_printed)
+void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, size_t level, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
 {
     out << "  " << name << " [rank = " << level;
-    if (already_printed[name])
+    if (in_previous_graph[name])
         out << ", color = \"grey\", fontcolor = \"grey\"";
     out << ", label = \"";
     if (node)
         out << node->element << "\", shape = box]\n";
     else
         out << "null\"]\n";
-    already_printed[name] = true;
+    in_current_graph[name] = true;
 }
 
-void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& already_printed)
+string strip_parent(string const& node_name)
 {
+    string result = node_name;
+    size_t comma = result.find(',');
+    if (comma != string::npos)
+        result.resize(comma);
+    return result;
+}
+
+void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
+{
+    string edge_name = strip_parent(from) + to;
     out << "  " << from << " -> " << to;
-    if (already_printed[from + to])
+    if (in_previous_graph[edge_name])
         out << " [color = \"grey\"]";
     out << '\n';
-    already_printed[from + to] = true;
+    in_current_graph[edge_name] = true;
 }
 
-string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, map<string, bool>& already_printed)
+string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
 {
-    string name = node_name(node);
+    string name = node_name(node, treat_moved_node_like_new and node ? node->up : nullptr);
 
-    dump_node(out, name, node, level, already_printed);
+    dump_node(out, name, node, level, in_previous_graph, in_current_graph);
 
     if (node)
     {
@@ -252,24 +274,24 @@ string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, m
         string right_child;
 
         if (node->left)
-            left_child = dump_node_dot(out, node->left, level + 1, already_printed);
+            left_child = dump_node_dot(out, node->left, level + 1, in_previous_graph, in_current_graph);
         else
         {
             /* Это нужно чтобы узел "null" в графе был не один общий, а свой в каждом месте. */
-            left_child = node_name(node, "left_null_child_of_");
-            dump_node(out, left_child, node->left, level + 1, already_printed);
+            left_child = node_name(nullptr, node, "left");
+            dump_node(out, left_child, node->left, level + 1, in_previous_graph, in_current_graph);
         }
 
         if (node->right)
-            right_child = dump_node_dot(out, node->right, level + 1, already_printed);
+            right_child = dump_node_dot(out, node->right, level + 1, in_previous_graph, in_current_graph);
         else
         {
-            right_child = node_name(node, "right_null_child_of_");
-            dump_node(out, right_child, node->right, level + 1, already_printed);
+            right_child = node_name(nullptr, node, "right");
+            dump_node(out, right_child, node->right, level + 1, in_previous_graph, in_current_graph);
         }
 
-        dump_edge(out, name, left_child, already_printed);
-        dump_edge(out, name, right_child, already_printed);
+        dump_edge(out, name, left_child, in_previous_graph, in_current_graph);
+        dump_edge(out, name, right_child, in_previous_graph, in_current_graph);
     }
 
     return name;
@@ -277,7 +299,8 @@ string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, m
 
 void dump_tree_dot(const Bin_Tree_Element *root)
 {
-    static map<string, bool> already_printed;
+    static map<string, bool> in_previous_graph;
+    map<string, bool> in_current_graph;
     /*
      * Лучше:
      * 1) set, но так запись проверки проще и естественней.
@@ -292,7 +315,7 @@ void dump_tree_dot(const Bin_Tree_Element *root)
 
     fstream out("tree.dot", fstream::out | fstream::app);
     out << "digraph {\n";
-    dump_node_dot(out, root, 0, already_printed);
+    dump_node_dot(out, root, 0, in_previous_graph, in_current_graph);
     out << "}\n\n";
     out.close();
     system("dot -Tpdf tree.dot > tree.pdf"); /* Тут используется пакет graphviz. */
@@ -303,6 +326,8 @@ void dump_tree_dot(const Bin_Tree_Element *root)
      * В картиночных форматах печатается только первый граф.
      * А в PDF можно смотреть как дерево меняется после проводимых над ним операций.
      */
+
+    swap(in_previous_graph, in_current_graph);
 }
 
 void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el)
