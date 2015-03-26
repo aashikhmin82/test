@@ -9,14 +9,16 @@
 
 using namespace std;
 
+static bool const treat_moved_node_like_new = true;
+
 class Bin_Tree_Element
 {
     public:
         size_t element;
         std::string colour;
-        Bin_Tree_Element *up = NULL, 
-                         *left = NULL, 
-                         *right = NULL;
+        Bin_Tree_Element *up = nullptr, 
+                         *left = nullptr, 
+                         *right = nullptr;
 
         Bin_Tree_Element(const size_t& ar_el, const std::string ar_col) : element(ar_el), colour(ar_col) {}
 };
@@ -62,7 +64,7 @@ class Tree_Output
                 std::vector<Bin_Tree_Element *>::iterator row_iter = (*matrix_iter).begin();   
                 while (row_iter != (*matrix_iter).end()) 
                 {
-                    if ((*row_iter) != nullptr) 
+                    if (*row_iter) 
                         cout << (*row_iter)->element << "(" << (*row_iter)->colour << ") ";
                     else 
                         cout << "NULL ";
@@ -79,7 +81,7 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
 {
     if (root->element > bin_tree_element->element) 
     {
-        if (root->left == NULL) 
+        if (!root->left) 
         {
             element_num = element_num * 2;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
@@ -95,7 +97,7 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
     } 
     else 
     {
-        if (root->right == NULL) 
+        if (!root->right) 
         {
             element_num = element_num * 2 + 1;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
@@ -124,26 +126,26 @@ void recreate_tree_f(Bin_Tree_Element *tree_el, Tree_Output *tree_func, size_t l
 
     tree_func->create_tree_to_output(level, element_num, *tree_el);
 
-    if (tree_el->left == NULL) 
-        element_num = element_num * 2;
-    else 
+    if (tree_el->left) 
     {
         ++level;
         element_num = element_num * 2;
         recreate_tree_f(tree_el->left, tree_func, level, element_num);
     }
+    else 
+        element_num = element_num * 2;
 
     level = level_tmp;
     element_num = element_num_tmp;
 
-    if (tree_el->right == NULL) 
-        element_num = element_num * 2 + 1;
-    else 
+    if (tree_el->right) 
     {
         ++level;
         element_num = element_num * 2 + 1;
         recreate_tree_f(tree_el->right, tree_func, level, element_num);
     }
+    else 
+        element_num = element_num * 2 + 1;
 }
 
 void add_value (Bin_Tree_Element *first, Tree_Output *tree_func, size_t value_to_add = 0)
@@ -176,7 +178,7 @@ void help()
 
 void select_max_value(const Bin_Tree_Element *root)
 {
-    if (root->right != NULL)
+    if (root->right)
         select_max_value(root->right);
     else
         cout << "MAX Value : " << root->element << endl;
@@ -184,7 +186,7 @@ void select_max_value(const Bin_Tree_Element *root)
 
 void select_min_value(const Bin_Tree_Element *root)
 {
-    if (root->left != NULL)
+    if (root->left)
         select_min_value(root->left);
     else
         cout << "MIN Value : " << root->element << endl;
@@ -198,7 +200,7 @@ void tree_search(const Bin_Tree_Element *root, size_t search_el = 0)
         cin >> search_el;
     }
 
-    if (root == NULL)
+    if (!root)
         cout << "Not found!" << endl;
     else if (root->element == search_el)
         cout << "Found : " << root->element << "\t Colour : " << root->colour << endl;
@@ -211,40 +213,60 @@ void tree_search(const Bin_Tree_Element *root, size_t search_el = 0)
     }
 }
 
-string node_name(const Bin_Tree_Element *node, const string& prefix = "")
+string node_name(const Bin_Tree_Element *node, const Bin_Tree_Element* parent = nullptr, const string& which_child = "")
 {
     ostringstream out;
-    out << '"' << prefix << node << '"';
+    out << '"' << node;
+    if (parent)
+    {
+        out << ',';
+        if (which_child.empty())
+            out << (parent->left == node ? "left" : "right");
+        else
+            out << which_child;
+        out << "_child_of_" << parent;
+    }
+    out << '"';
     return out.str();
 }
 
-void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, size_t level, map<string, bool>& already_printed)
+void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, size_t level, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
 {
     out << "  " << name << " [rank = " << level;
-    if (already_printed[name])
+    if (in_previous_graph[name])
         out << ", color = \"grey\", fontcolor = \"grey\"";
     out << ", label = \"";
     if (node)
-        out << node->element << "\", shape = box]\n";
+        out << node->element << " (" << node->colour << ") \", shape = box]\n";
     else
         out << "null\"]\n";
-    already_printed[name] = true;
+    in_current_graph[name] = true;
 }
 
-void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& already_printed)
+string strip_parent(string const& node_name)
 {
+    string result = node_name;
+    size_t comma = result.find(',');
+    if (comma != string::npos)
+        result.resize(comma);
+    return result;
+}
+
+void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
+{
+    string edge_name = strip_parent(from) + to;
     out << "  " << from << " -> " << to;
-    if (already_printed[from + to])
+    if (in_previous_graph[edge_name])
         out << " [color = \"grey\"]";
     out << '\n';
-    already_printed[from + to] = true;
+    in_current_graph[edge_name] = true;
 }
 
-string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, map<string, bool>& already_printed)
+string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
 {
-    string name = node_name(node);
+    string name = node_name(node, treat_moved_node_like_new and node ? node->up : nullptr);
 
-    dump_node(out, name, node, level, already_printed);
+    dump_node(out, name, node, level, in_previous_graph, in_current_graph);
 
     if (node)
     {
@@ -252,24 +274,24 @@ string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, m
         string right_child;
 
         if (node->left)
-            left_child = dump_node_dot(out, node->left, level + 1, already_printed);
+            left_child = dump_node_dot(out, node->left, level + 1, in_previous_graph, in_current_graph);
         else
         {
             /* Это нужно чтобы узел "null" в графе был не один общий, а свой в каждом месте. */
-            left_child = node_name(node, "left_null_child_of_");
-            dump_node(out, left_child, node->left, level + 1, already_printed);
+            left_child = node_name(nullptr, node, "left");
+            dump_node(out, left_child, node->left, level + 1, in_previous_graph, in_current_graph);
         }
 
         if (node->right)
-            right_child = dump_node_dot(out, node->right, level + 1, already_printed);
+            right_child = dump_node_dot(out, node->right, level + 1, in_previous_graph, in_current_graph);
         else
         {
-            right_child = node_name(node, "right_null_child_of_");
-            dump_node(out, right_child, node->right, level + 1, already_printed);
+            right_child = node_name(nullptr, node, "right");
+            dump_node(out, right_child, node->right, level + 1, in_previous_graph, in_current_graph);
         }
 
-        dump_edge(out, name, left_child, already_printed);
-        dump_edge(out, name, right_child, already_printed);
+        dump_edge(out, name, left_child, in_previous_graph, in_current_graph);
+        dump_edge(out, name, right_child, in_previous_graph, in_current_graph);
     }
 
     return name;
@@ -277,7 +299,8 @@ string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, m
 
 void dump_tree_dot(const Bin_Tree_Element *root)
 {
-    static map<string, bool> already_printed;
+    static map<string, bool> in_previous_graph;
+    map<string, bool> in_current_graph;
     /*
      * Лучше:
      * 1) set, но так запись проверки проще и естественней.
@@ -292,7 +315,7 @@ void dump_tree_dot(const Bin_Tree_Element *root)
 
     fstream out("tree.dot", fstream::out | fstream::app);
     out << "digraph {\n";
-    dump_node_dot(out, root, 0, already_printed);
+    dump_node_dot(out, root, 0, in_previous_graph, in_current_graph);
     out << "}\n\n";
     out.close();
     system("dot -Tpdf tree.dot > tree.pdf"); /* Тут используется пакет graphviz. */
@@ -303,16 +326,21 @@ void dump_tree_dot(const Bin_Tree_Element *root)
      * В картиночных форматах печатается только первый граф.
      * А в PDF можно смотреть как дерево меняется после проводимых над ним операций.
      */
+
+    swap(in_previous_graph, in_current_graph);
 }
 
-void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el)
+void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_Tree_Element *root)
 {
-    if ((del_el->up->left != NULL) and (del_el->up->left->element == del_el->element))
-        del_el->up->left = replace_el;
-    else
-        del_el->up->right = replace_el;
+    if (del_el->up)
+    {
+        if ((del_el->up->left) and (del_el->up->left->element == del_el->element))
+            del_el->up->left = replace_el;
+        else
+            del_el->up->right = replace_el;
+    }
 
-    if (del_el->left != NULL)
+    if (del_el->left)
     {
         replace_el->left = del_el->left;
         del_el->left->up = replace_el;
@@ -320,7 +348,7 @@ void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el)
 
     if (del_el->right != replace_el)
     {
-        if (replace_el->right != NULL)
+        if (replace_el->right)
             replace_el->right->up = replace_el->up;
 
         replace_el->up->left = replace_el->right;
@@ -329,7 +357,14 @@ void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el)
         del_el->right->up = replace_el;
     }
 
-    replace_el->up = del_el->up;
+    if (del_el->up)
+        replace_el->up = del_el->up;
+    else
+    {
+        replace_el->up = nullptr;
+        *root = *replace_el;
+    }
+
 }
 
 void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_Element *root, size_t delete_el = 0)
@@ -340,63 +375,87 @@ void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_
         cin >> delete_el;
     }
 
-    if (tree_el == NULL)
+    if (!tree_el)
         cout << "Not found!" << endl;
     else if (tree_el->element == delete_el)
     {
-        Bin_Tree_Element *up_el = tree_el->up;
-
-        if ((tree_el->left != NULL) and (tree_el->right != NULL))
+        if ((tree_el->left) and (tree_el->right))
         {
-            if (tree_el->right->left == NULL)
-                delete_replace(tree_el, tree_el->right);
+            if (!tree_el->right->left)
+                delete_replace(tree_el, tree_el->right, root);
             else
             {
                 Bin_Tree_Element *min_el = tree_el->right;
-                while (min_el->left != NULL)
+                while (min_el->left)
                     min_el = min_el->left;
 
-                delete_replace(tree_el, min_el);
+                delete_replace(tree_el, min_el, root);
             }
         }
-        else if ((tree_el->left == NULL) and (tree_el->right == NULL)) 
+        else if ((!tree_el->left) and (!tree_el->right)) 
         {
-            if ((up_el->left != NULL) and (up_el->left->element == tree_el->element))
-                tree_el->up->left = NULL;
+            if (!tree_el->up)
+                cerr << "Error: Unable to delete! Only one node." << endl;
             else
-                tree_el->up->right = NULL;
+            {
+                Bin_Tree_Element *up_el = tree_el->up;
+
+                if ((up_el->left) and (up_el->left->element == tree_el->element))
+                    tree_el->up->left = nullptr;
+                else
+                    tree_el->up->right = nullptr;
+            }
         } 
         else  
         {
-            if (tree_el->left != NULL)
+            if (!tree_el->up)
             {
-                if ((up_el->left != NULL) and (up_el->left->element == tree_el->element))
+                if (tree_el->left)
                 {
-                    up_el->left = tree_el->left;
-                    tree_el->left->up = up_el;
+                    tree_el->left->up = nullptr;
+                    *root = *tree_el->left;
                 }
                 else
                 {
-                    up_el->right = tree_el->left;
-                    tree_el->left->up = up_el;
+                    tree_el->right->up = nullptr;
+                    *root = *tree_el->right;
                 }
             }
             else
             {
-                if ((up_el->left != NULL) and (up_el->left->element == tree_el->element))
+                Bin_Tree_Element *up_el = tree_el->up;
+
+                if (tree_el->left)
                 {
-                    up_el->left = tree_el->right;
-                    tree_el->right->up = up_el;
+                    if ((up_el->left) and (up_el->left->element == tree_el->element))
+                    {
+                        up_el->left = tree_el->left;
+                        tree_el->left->up = up_el;
+                    }
+                    else
+                    {
+                        up_el->right = tree_el->left;
+                        tree_el->left->up = up_el;
+                    }
                 }
                 else
                 {
-                    up_el->right = tree_el->right;
-                    tree_el->right->up = up_el;
+                    if ((up_el->left) and (up_el->left->element == tree_el->element))
+                    {
+                        up_el->left = tree_el->right;
+                        tree_el->right->up = up_el;
+                    }
+                    else
+                    {
+                        up_el->right = tree_el->right;
+                        tree_el->right->up = up_el;
+                    }
                 }
             }
         }
 
-        delete(tree_el);
+        if (tree_el != root)
+            delete(tree_el);
         recreate_tree_f(root, tree_func);
     }
     else
@@ -435,11 +494,12 @@ int main()
 
     std::vector<size_t> test_array(size);
     for (auto& test_element : test_array) {
-//        test_element = rand() % 100;
         test_element = nrand(100);
     }
 
+//    std::vector<size_t> test_array;
 //    test_array = {50, 20, 10, 60, 70, 30, 25, 40, 80};
+//    test_array = {70, 30, 25, 40};
 
     size_t level = 0;
     size_t element_number = 1;
