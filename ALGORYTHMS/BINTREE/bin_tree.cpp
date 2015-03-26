@@ -241,6 +241,7 @@ void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, s
     else
         out << "null\"]\n";
     in_current_graph[name] = true;
+<<<<<<< HEAD
 }
 
 string strip_parent(string const& node_name)
@@ -254,6 +255,21 @@ string strip_parent(string const& node_name)
 
 void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
 {
+=======
+}
+
+string strip_parent(string const& node_name)
+{
+    string result = node_name;
+    size_t comma = result.find(',');
+    if (comma != string::npos)
+        result.resize(comma);
+    return result;
+}
+
+void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
+{
+>>>>>>> f8164c0de64af2f45285d76f1f68b3da1c1ce7bf
     string edge_name = strip_parent(from) + to;
     out << "  " << from << " -> " << to;
     if (in_previous_graph[edge_name])
