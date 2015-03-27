@@ -173,6 +173,7 @@ void help()
         << "\tdump : Dump the Tree.\n" 
         << "\tmin_value : Print Min value.\n"
         << "\tmax_value : Print Max value.\n"
+        << "\tsave_config [filename] : Save config.\n"
         << "\texit : to exit" << endl;
 }
 
@@ -468,6 +469,29 @@ void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_
 
 }
 
+void config_to_file(ostream& out, const Bin_Tree_Element *node)
+{
+    out << node->element << "\n";
+
+    if (node->left)
+        config_to_file(out, node->left);
+
+    if (node->right)
+        config_to_file(out, node->right);
+}
+
+void save_config(const Bin_Tree_Element *root, string save_file = "test.txt")
+{
+    cout << "Enter save file : ";
+    cin >> save_file;
+
+    fstream out(save_file, fstream::out);
+
+    config_to_file(out, root);
+
+    out.close();
+}
+
 size_t nrand(size_t n)
 {
     const size_t bucket_size = RAND_MAX / n;
@@ -479,8 +503,45 @@ size_t nrand(size_t n)
     return r;
 } 
 
-int main()
+int main(int argc, char* arg_vec[])
 {
+    size_t size = 0;
+    string first_arg;
+    vector<size_t> input_config;
+
+    if (argc > 1)
+    {
+        istringstream in(arg_vec[1]);
+        in >> first_arg;
+
+        if (first_arg == "--help")
+        {
+            cout << "HELP: " << endl;
+            cout << "\t--size [value]" << endl;
+            cout << "\t--config [filename]" << endl;
+            return 0;
+        }
+        else if (first_arg == "--size")
+        {
+            istringstream in(arg_vec[2]);
+            in >> size;
+        }
+        else if (first_arg == "--config")
+        {
+            string file_name;
+            size_t str_el;
+            istringstream in(arg_vec[2]);
+            in >> file_name;
+
+            ifstream config_fl(file_name);
+            while (config_fl >> str_el)
+            {
+                input_config.push_back(str_el);
+            }
+            config_fl.close();
+        }
+    }
+    
     std::cout << "Binary Tree" << std::endl;
     Tree_Output *tree_output_func = new Tree_Output;
     Tree_Output *tree_output_func1 = new Tree_Output;
@@ -488,13 +549,27 @@ int main()
 
     srand( static_cast<size_t>(time(nullptr)) );
 
-    size_t size;
-    std::cout << "Enter the Size : ";
-    std::cin >> size;
+    if ((size == 0) and (input_config.size() == 0))
+    {
+        std::cout << "Enter the Size : ";
+        std::cin >> size;
+    }
+
+    if (size == 0)
+    {
+        size = input_config.size();
+    }
 
     std::vector<size_t> test_array(size);
-    for (auto& test_element : test_array) {
-        test_element = nrand(100);
+    if (input_config.size() == 0)
+    {
+        for (auto& test_element : test_array) {
+            test_element = nrand(100);
+        }
+    }
+    else
+    {
+        test_array = input_config;
     }
 
 //    std::vector<size_t> test_array;
@@ -533,6 +608,7 @@ int main()
     funcs["max_value"] = [&first]() { select_max_value(first); };
     funcs["search_value"] = [&first]() { tree_search(first); };
     funcs["delete_value"] = [&first, &tree_output_func]() { delete_element(first, tree_output_func, first); };
+    funcs["save_config"] = [&first]() { save_config(first); };
     funcs["exit"] = []() { exit(1); };
 
     string f_name;
