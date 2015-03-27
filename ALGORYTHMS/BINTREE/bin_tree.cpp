@@ -16,9 +16,9 @@ class Bin_Tree_Element
     public:
         size_t element;
         std::string colour;
-        Bin_Tree_Element *up = nullptr, 
-                         *left = nullptr, 
-                         *right = nullptr;
+        Bin_Tree_Element *up = NULL, 
+                         *left = NULL, 
+                         *right = NULL;
 
         Bin_Tree_Element(const size_t& ar_el, const std::string ar_col) : element(ar_el), colour(ar_col) {}
 };
@@ -64,7 +64,7 @@ class Tree_Output
                 std::vector<Bin_Tree_Element *>::iterator row_iter = (*matrix_iter).begin();   
                 while (row_iter != (*matrix_iter).end()) 
                 {
-                    if (*row_iter) 
+                    if ((*row_iter) != nullptr) 
                         cout << (*row_iter)->element << "(" << (*row_iter)->colour << ") ";
                     else 
                         cout << "NULL ";
@@ -81,7 +81,7 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
 {
     if (root->element > bin_tree_element->element) 
     {
-        if (!root->left) 
+        if (root->left == NULL) 
         {
             element_num = element_num * 2;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
@@ -97,7 +97,7 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
     } 
     else 
     {
-        if (!root->right) 
+        if (root->right == NULL) 
         {
             element_num = element_num * 2 + 1;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
@@ -126,26 +126,26 @@ void recreate_tree_f(Bin_Tree_Element *tree_el, Tree_Output *tree_func, size_t l
 
     tree_func->create_tree_to_output(level, element_num, *tree_el);
 
-    if (tree_el->left) 
+    if (tree_el->left == NULL) 
+        element_num = element_num * 2;
+    else 
     {
         ++level;
         element_num = element_num * 2;
         recreate_tree_f(tree_el->left, tree_func, level, element_num);
     }
-    else 
-        element_num = element_num * 2;
 
     level = level_tmp;
     element_num = element_num_tmp;
 
-    if (tree_el->right) 
+    if (tree_el->right == NULL) 
+        element_num = element_num * 2 + 1;
+    else 
     {
         ++level;
         element_num = element_num * 2 + 1;
         recreate_tree_f(tree_el->right, tree_func, level, element_num);
     }
-    else 
-        element_num = element_num * 2 + 1;
 }
 
 void add_value (Bin_Tree_Element *first, Tree_Output *tree_func, size_t value_to_add = 0)
@@ -173,13 +173,12 @@ void help()
         << "\tdump : Dump the Tree.\n" 
         << "\tmin_value : Print Min value.\n"
         << "\tmax_value : Print Max value.\n"
-        << "\tsave_config [filename] : Save config.\n"
         << "\texit : to exit" << endl;
 }
 
 void select_max_value(const Bin_Tree_Element *root)
 {
-    if (root->right)
+    if (root->right != NULL)
         select_max_value(root->right);
     else
         cout << "MAX Value : " << root->element << endl;
@@ -187,7 +186,7 @@ void select_max_value(const Bin_Tree_Element *root)
 
 void select_min_value(const Bin_Tree_Element *root)
 {
-    if (root->left)
+    if (root->left != NULL)
         select_min_value(root->left);
     else
         cout << "MIN Value : " << root->element << endl;
@@ -201,7 +200,7 @@ void tree_search(const Bin_Tree_Element *root, size_t search_el = 0)
         cin >> search_el;
     }
 
-    if (!root)
+    if (root == NULL)
         cout << "Not found!" << endl;
     else if (root->element == search_el)
         cout << "Found : " << root->element << "\t Colour : " << root->colour << endl;
@@ -238,7 +237,7 @@ void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, s
         out << ", color = \"grey\", fontcolor = \"grey\"";
     out << ", label = \"";
     if (node)
-        out << node->element << " (" << node->colour << ") \", shape = box]\n";
+        out << node->element << "\", shape = box]\n";
     else
         out << "null\"]\n";
     in_current_graph[name] = true;
@@ -331,17 +330,14 @@ void dump_tree_dot(const Bin_Tree_Element *root)
     swap(in_previous_graph, in_current_graph);
 }
 
-void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_Tree_Element *root)
+void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el)
 {
-    if (del_el->up)
-    {
-        if ((del_el->up->left) and (del_el->up->left->element == del_el->element))
-            del_el->up->left = replace_el;
-        else
-            del_el->up->right = replace_el;
-    }
+    if ((del_el->up->left != NULL) and (del_el->up->left->element == del_el->element))
+        del_el->up->left = replace_el;
+    else
+        del_el->up->right = replace_el;
 
-    if (del_el->left)
+    if (del_el->left != NULL)
     {
         replace_el->left = del_el->left;
         del_el->left->up = replace_el;
@@ -349,7 +345,7 @@ void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_
 
     if (del_el->right != replace_el)
     {
-        if (replace_el->right)
+        if (replace_el->right != NULL)
             replace_el->right->up = replace_el->up;
 
         replace_el->up->left = replace_el->right;
@@ -358,14 +354,7 @@ void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_
         del_el->right->up = replace_el;
     }
 
-    if (del_el->up)
-        replace_el->up = del_el->up;
-    else
-    {
-        replace_el->up = nullptr;
-        *root = *replace_el;
-    }
-
+    replace_el->up = del_el->up;
 }
 
 void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_Element *root, size_t delete_el = 0)
@@ -376,87 +365,63 @@ void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_
         cin >> delete_el;
     }
 
-    if (!tree_el)
+    if (tree_el == NULL)
         cout << "Not found!" << endl;
     else if (tree_el->element == delete_el)
     {
-        if ((tree_el->left) and (tree_el->right))
+        Bin_Tree_Element *up_el = tree_el->up;
+
+        if ((tree_el->left != NULL) and (tree_el->right != NULL))
         {
-            if (!tree_el->right->left)
-                delete_replace(tree_el, tree_el->right, root);
+            if (tree_el->right->left == NULL)
+                delete_replace(tree_el, tree_el->right);
             else
             {
                 Bin_Tree_Element *min_el = tree_el->right;
-                while (min_el->left)
+                while (min_el->left != NULL)
                     min_el = min_el->left;
 
-                delete_replace(tree_el, min_el, root);
+                delete_replace(tree_el, min_el);
             }
         }
-        else if ((!tree_el->left) and (!tree_el->right)) 
+        else if ((tree_el->left == NULL) and (tree_el->right == NULL)) 
         {
-            if (!tree_el->up)
-                cerr << "Error: Unable to delete! Only one node." << endl;
+            if ((up_el->left != NULL) and (up_el->left->element == tree_el->element))
+                tree_el->up->left = NULL;
             else
-            {
-                Bin_Tree_Element *up_el = tree_el->up;
-
-                if ((up_el->left) and (up_el->left->element == tree_el->element))
-                    tree_el->up->left = nullptr;
-                else
-                    tree_el->up->right = nullptr;
-            }
+                tree_el->up->right = NULL;
         } 
         else  
         {
-            if (!tree_el->up)
+            if (tree_el->left != NULL)
             {
-                if (tree_el->left)
+                if ((up_el->left != NULL) and (up_el->left->element == tree_el->element))
                 {
-                    tree_el->left->up = nullptr;
-                    *root = *tree_el->left;
+                    up_el->left = tree_el->left;
+                    tree_el->left->up = up_el;
                 }
                 else
                 {
-                    tree_el->right->up = nullptr;
-                    *root = *tree_el->right;
+                    up_el->right = tree_el->left;
+                    tree_el->left->up = up_el;
                 }
             }
             else
             {
-                Bin_Tree_Element *up_el = tree_el->up;
-
-                if (tree_el->left)
+                if ((up_el->left != NULL) and (up_el->left->element == tree_el->element))
                 {
-                    if ((up_el->left) and (up_el->left->element == tree_el->element))
-                    {
-                        up_el->left = tree_el->left;
-                        tree_el->left->up = up_el;
-                    }
-                    else
-                    {
-                        up_el->right = tree_el->left;
-                        tree_el->left->up = up_el;
-                    }
+                    up_el->left = tree_el->right;
+                    tree_el->right->up = up_el;
                 }
                 else
                 {
-                    if ((up_el->left) and (up_el->left->element == tree_el->element))
-                    {
-                        up_el->left = tree_el->right;
-                        tree_el->right->up = up_el;
-                    }
-                    else
-                    {
-                        up_el->right = tree_el->right;
-                        tree_el->right->up = up_el;
-                    }
+                    up_el->right = tree_el->right;
+                    tree_el->right->up = up_el;
                 }
             }
         }
 
-        if (tree_el != root)
-            delete(tree_el);
+        delete(tree_el);
         recreate_tree_f(root, tree_func);
     }
     else
@@ -467,29 +432,6 @@ void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_
             delete_element(tree_el->right, tree_func, root, delete_el);
     }
 
-}
-
-void config_to_file(ostream& out, const Bin_Tree_Element *node)
-{
-    out << node->element << "\n";
-
-    if (node->left)
-        config_to_file(out, node->left);
-
-    if (node->right)
-        config_to_file(out, node->right);
-}
-
-void save_config(const Bin_Tree_Element *root, string save_file = "test.txt")
-{
-    cout << "Enter save file : ";
-    cin >> save_file;
-
-    fstream out(save_file, fstream::out);
-
-    config_to_file(out, root);
-
-    out.close();
 }
 
 size_t nrand(size_t n)
@@ -503,45 +445,8 @@ size_t nrand(size_t n)
     return r;
 } 
 
-int main(int argc, char* arg_vec[])
+int main()
 {
-    size_t size = 0;
-    string first_arg;
-    vector<size_t> input_config;
-
-    if (argc > 1)
-    {
-        istringstream in(arg_vec[1]);
-        in >> first_arg;
-
-        if (first_arg == "--help")
-        {
-            cout << "HELP: " << endl;
-            cout << "\t--size [value]" << endl;
-            cout << "\t--config [filename]" << endl;
-            return 0;
-        }
-        else if (first_arg == "--size")
-        {
-            istringstream in(arg_vec[2]);
-            in >> size;
-        }
-        else if (first_arg == "--config")
-        {
-            string file_name;
-            size_t str_el;
-            istringstream in(arg_vec[2]);
-            in >> file_name;
-
-            ifstream config_fl(file_name);
-            while (config_fl >> str_el)
-            {
-                input_config.push_back(str_el);
-            }
-            config_fl.close();
-        }
-    }
-    
     std::cout << "Binary Tree" << std::endl;
     Tree_Output *tree_output_func = new Tree_Output;
     Tree_Output *tree_output_func1 = new Tree_Output;
@@ -549,32 +454,17 @@ int main(int argc, char* arg_vec[])
 
     srand( static_cast<size_t>(time(nullptr)) );
 
-    if ((size == 0) and (input_config.size() == 0))
-    {
-        std::cout << "Enter the Size : ";
-        std::cin >> size;
-    }
-
-    if (size == 0)
-    {
-        size = input_config.size();
-    }
+    size_t size;
+    std::cout << "Enter the Size : ";
+    std::cin >> size;
 
     std::vector<size_t> test_array(size);
-    if (input_config.size() == 0)
-    {
-        for (auto& test_element : test_array) {
-            test_element = nrand(100);
-        }
-    }
-    else
-    {
-        test_array = input_config;
+    for (auto& test_element : test_array) {
+//        test_element = rand() % 100;
+        test_element = nrand(100);
     }
 
-//    std::vector<size_t> test_array;
 //    test_array = {50, 20, 10, 60, 70, 30, 25, 40, 80};
-//    test_array = {70, 30, 25, 40};
 
     size_t level = 0;
     size_t element_number = 1;
@@ -608,7 +498,6 @@ int main(int argc, char* arg_vec[])
     funcs["max_value"] = [&first]() { select_max_value(first); };
     funcs["search_value"] = [&first]() { tree_search(first); };
     funcs["delete_value"] = [&first, &tree_output_func]() { delete_element(first, tree_output_func, first); };
-    funcs["save_config"] = [&first]() { save_config(first); };
     funcs["exit"] = []() { exit(1); };
 
     string f_name;
