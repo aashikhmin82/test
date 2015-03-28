@@ -7,21 +7,11 @@
 #include <map>
 #include <functional>
 
+#include "bin_tree.h"
+#include "dot.h"
+
+using namespace dot;
 using namespace std;
-
-static bool const treat_moved_node_like_new = true;
-
-class Bin_Tree_Element
-{
-    public:
-        size_t element;
-        std::string colour;
-        Bin_Tree_Element *up = nullptr, 
-                         *left = nullptr, 
-                         *right = nullptr;
-
-        Bin_Tree_Element(const size_t& ar_el, const std::string ar_col) : element(ar_el), colour(ar_col) {}
-};
 
 class Tree_Output 
 {
@@ -77,8 +67,10 @@ class Tree_Output
         }
 };
 
-void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, Tree_Output *tree_func, size_t level = 1, size_t element_num = 1)
+void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, string& label, highlight_t& highlight, Tree_Output *tree_func, size_t level = 1, size_t element_num = 1)
 {
+    highlight.node(root, visited);
+
     if (root->element > bin_tree_element->element) 
     {
         if (!root->left) 
@@ -87,12 +79,15 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
             root->left = bin_tree_element;
             bin_tree_element->up = root;
+            highlight.edge(root, left_edge, added);
+            highlight.leaf(bin_tree_element, added);
         } 
         else 
         {
             ++level;
             element_num = element_num * 2;
-            insert_element(root->left, bin_tree_element, tree_func, level, element_num);
+            insert_element(root->left, bin_tree_element, label, highlight, tree_func, level, element_num);
+            highlight.edge(root, left_edge, visited);
         }
     } 
     else 
@@ -103,12 +98,15 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
             root->right = bin_tree_element;
             bin_tree_element->up = root;
+            highlight.edge(root, right_edge, added);
+            highlight.leaf(bin_tree_element, added);
         } 
         else 
         {
             ++level;
             element_num = element_num * 2 + 1;
-            insert_element(root->right, bin_tree_element, tree_func, level, element_num);
+            insert_element(root->right, bin_tree_element, label, highlight, tree_func, level, element_num);
+            highlight.edge(root, right_edge, visited);
         }
     }
 }
@@ -148,13 +146,17 @@ void recreate_tree_f(Bin_Tree_Element *tree_el, Tree_Output *tree_func, size_t l
         element_num = element_num * 2 + 1;
 }
 
-void add_value (Bin_Tree_Element *first, Tree_Output *tree_func, size_t value_to_add = 0)
+void add_value (Bin_Tree_Element *first, string& label, highlight_t& highlight, Tree_Output *tree_func, size_t value_to_add = 0)
 {
     cout << "Value to add : ";
     cin >> value_to_add;
 
+    ostringstream out;
+    out << "Command: 'add " << value_to_add << "'. ";
+    label = out.str();
+
     Bin_Tree_Element *tree_element = new Bin_Tree_Element(value_to_add, "NON");
-    insert_element(first, tree_element, tree_func);
+    insert_element(first, tree_element, label, highlight, tree_func);
 }
 
 void print_tree_f(Tree_Output *tree_func)
@@ -193,142 +195,49 @@ void select_min_value(const Bin_Tree_Element *root)
         cout << "MIN Value : " << root->element << endl;
 }
 
-void tree_search(const Bin_Tree_Element *root, size_t search_el = 0)
+void tree_search(const Bin_Tree_Element *root, string& label, highlight_t& highlight, size_t search_el = 0)
 {
     if (search_el == 0)
     {
         cout << "Enter the value to search : ";
         cin >> search_el;
+
+        ostringstream out;
+        out << "Command: 'search " << search_el << "'. ";
+        label = out.str();
     }
+
+    ostringstream out;
 
     if (!root)
-        cout << "Not found!" << endl;
+    {
+        out << "Not found!";
+        cout << out.str() << endl;
+        label += out.str();
+    }
     else if (root->element == search_el)
-        cout << "Found : " << root->element << "\t Colour : " << root->colour << endl;
+    {
+        highlight.node(root, found);
+        out << "Found : " << root->element << "\t Colour : " << root->colour;
+        cout << out.str() << endl;
+        label += out.str();
+    }
     else
     {
+        highlight.node(root, visited);
         if (root->element > search_el)
-            tree_search(root->left, search_el);
-        else
-            tree_search(root->right, search_el);
-    }
-}
-
-string node_name(const Bin_Tree_Element *node, const Bin_Tree_Element* parent = nullptr, const string& which_child = "")
-{
-    ostringstream out;
-    out << '"' << node;
-    if (parent)
-    {
-        out << ',';
-        if (which_child.empty())
-            out << (parent->left == node ? "left" : "right");
-        else
-            out << which_child;
-        out << "_child_of_" << parent;
-    }
-    out << '"';
-    return out.str();
-}
-
-void dump_node(ostream& out, string const& name, const Bin_Tree_Element *node, size_t level, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
-{
-    out << "  " << name << " [rank = " << level;
-    if (in_previous_graph[name])
-        out << ", color = \"grey\", fontcolor = \"grey\"";
-    out << ", label = \"";
-    if (node)
-        out << node->element << " (" << node->colour << ") \", shape = box]\n";
-    else
-        out << "null\"]\n";
-    in_current_graph[name] = true;
-}
-
-string strip_parent(string const& node_name)
-{
-    string result = node_name;
-    size_t comma = result.find(',');
-    if (comma != string::npos)
-        result.resize(comma);
-    return result;
-}
-
-void dump_edge(ostream& out, string const& from, string const& to, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
-{
-    string edge_name = strip_parent(from) + to;
-    out << "  " << from << " -> " << to;
-    if (in_previous_graph[edge_name])
-        out << " [color = \"grey\"]";
-    out << '\n';
-    in_current_graph[edge_name] = true;
-}
-
-string dump_node_dot(ostream& out, const Bin_Tree_Element *node, size_t level, map<string, bool>& in_previous_graph, map<string, bool>& in_current_graph)
-{
-    string name = node_name(node, treat_moved_node_like_new and node ? node->up : nullptr);
-
-    dump_node(out, name, node, level, in_previous_graph, in_current_graph);
-
-    if (node)
-    {
-        string left_child;
-        string right_child;
-
-        if (node->left)
-            left_child = dump_node_dot(out, node->left, level + 1, in_previous_graph, in_current_graph);
+        {
+            highlight.edge(root, left_edge, root->left ? visited : not_found);
+            highlight.node(nodeid_t(nullptr, root, left_edge), not_found);
+            tree_search(root->left, label, highlight, search_el);
+        }
         else
         {
-            /* Это нужно чтобы узел "null" в графе был не один общий, а свой в каждом месте. */
-            left_child = node_name(nullptr, node, "left");
-            dump_node(out, left_child, node->left, level + 1, in_previous_graph, in_current_graph);
+            highlight.edge(root, right_edge, root->right ? visited : not_found);
+            highlight.node(nodeid_t(nullptr, root, right_edge), not_found);
+            tree_search(root->right, label, highlight, search_el);
         }
-
-        if (node->right)
-            right_child = dump_node_dot(out, node->right, level + 1, in_previous_graph, in_current_graph);
-        else
-        {
-            right_child = node_name(nullptr, node, "right");
-            dump_node(out, right_child, node->right, level + 1, in_previous_graph, in_current_graph);
-        }
-
-        dump_edge(out, name, left_child, in_previous_graph, in_current_graph);
-        dump_edge(out, name, right_child, in_previous_graph, in_current_graph);
     }
-
-    return name;
-}
-
-void dump_tree_dot(const Bin_Tree_Element *root)
-{
-    static map<string, bool> in_previous_graph;
-    map<string, bool> in_current_graph;
-    /*
-     * Лучше:
-     * 1) set, но так запись проверки проще и естественней.
-     * 2) Завести по отдельному контейнеру для узлов и рёбер, но я решил не усложнять.
-     * 3) Наверное, стоит обойтись без static, принимая этот контейнер снаружи или переделав это всё в класс.
-     *
-     * И ещё, этот метод, в паре с идентификацией узлов по их адресам в памяти,
-     * работает нестабильно при освобождении-перевыделении памяти под узлы.
-     * Так как новый узел может получить адрес старого (уже напечатанного и потом удалённого).
-     * Тогда он будет ошибочно напечатан серым цветом, как будто он старый.
-     */
-
-    fstream out("tree.dot", fstream::out | fstream::app);
-    out << "digraph {\n";
-    dump_node_dot(out, root, 0, in_previous_graph, in_current_graph);
-    out << "}\n\n";
-    out.close();
-    system("dot -Tpdf tree.dot > tree.pdf"); /* Тут используется пакет graphviz. */
-    cout << "Dumped to tree.dot and tree.pdf .\n";
-    /*
-     * Выбрал PDF, потому что в нём на каждой странице будет по графу –
-     * файл tree.dot каждый раз открывается на дозапись.
-     * В картиночных форматах печатается только первый граф.
-     * А в PDF можно смотреть как дерево меняется после проводимых над ним операций.
-     */
-
-    swap(in_previous_graph, in_current_graph);
 }
 
 void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_Tree_Element *root)
@@ -368,16 +277,25 @@ void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_
 
 }
 
-void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_Element *root, size_t delete_el = 0)
+void delete_element(Bin_Tree_Element *tree_el, string& label, highlight_t& highlight, Tree_Output *tree_func, Bin_Tree_Element *root, size_t delete_el = 0)
 {
     if (delete_el == 0)
     {
         cout << "Enter the value to delete : ";
         cin >> delete_el;
+
+        ostringstream out;
+        out << "Command: 'delete " << delete_el << "'. ";
+        label = out.str();
     }
 
+    ostringstream out;
     if (!tree_el)
-        cout << "Not found!" << endl;
+    {
+        out << "Not found!";
+        cout << out.str() << endl;
+        label += out.str();
+    }
     else if (tree_el->element == delete_el)
     {
         if ((tree_el->left) and (tree_el->right))
@@ -396,7 +314,11 @@ void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_
         else if ((!tree_el->left) and (!tree_el->right)) 
         {
             if (!tree_el->up)
-                cerr << "Error: Unable to delete! Only one node." << endl;
+            {
+                out << "Error: Unable to delete! Only one node.";
+                cerr << out.str() << endl;
+                label += out.str();
+            }
             else
             {
                 Bin_Tree_Element *up_el = tree_el->up;
@@ -461,10 +383,19 @@ void delete_element(Bin_Tree_Element *tree_el, Tree_Output *tree_func, Bin_Tree_
     }
     else
     {
+        highlight.node(tree_el, visited);
         if (tree_el->element > delete_el)
-            delete_element(tree_el->left, tree_func, root, delete_el);
+        {
+            highlight.edge(tree_el, left_edge, tree_el->left ? visited : not_found);
+            highlight.node(nodeid_t(nullptr, tree_el, left_edge), not_found);
+            delete_element(tree_el->left, label, highlight, tree_func, root, delete_el);
+        }
         else
-            delete_element(tree_el->right, tree_func, root, delete_el);
+        {
+            highlight.edge(tree_el, right_edge, tree_el->right ? visited : not_found);
+            highlight.node(nodeid_t(nullptr, tree_el, right_edge), not_found);
+            delete_element(tree_el->right, label, highlight, tree_func, root, delete_el);
+        }
     }
 
 }
@@ -576,10 +507,8 @@ int main(int argc, char* arg_vec[])
 //    test_array = {50, 20, 10, 60, 70, 30, 25, 40, 80};
 //    test_array = {70, 30, 25, 40};
 
-    size_t level = 0;
     size_t element_number = 1;
-    Bin_Tree_Element *first = new Bin_Tree_Element(test_array[0], "NON");
-    tree_output_func->create_tree_to_output(level, element_number, *first);
+    Bin_Tree_Element *first;
 
     std::cout << "Test array : ";
     for (auto& test_element : test_array) {
@@ -588,26 +517,62 @@ int main(int argc, char* arg_vec[])
     std::cout << std::endl;
 
     std::cout << "Test array : ";
-    level = 1;
     element_number = 1;
-    for (size_t i = 1; i < test_array.size(); ++i) 
+    for (size_t i = 0; i < test_array.size(); ++i) 
     {
+        highlight_t highlight;
         Bin_Tree_Element *tree_element = new Bin_Tree_Element(test_array[i], "NON");
-        insert_element(first, tree_element, tree_output_func);
+        highlight.node(tree_element, added);
+
+        if (i == 0)
+        {
+            string label = "Creating tree from scratch.";
+            highlight.node(nullptr, added);
+            dump_tree(nullptr, highlight, "creation", label);
+            first = tree_element;
+            tree_output_func->create_tree_to_output(0, element_number, *first);
+            highlight.leaf(first, added);
+        }
+        else
+        {
+            string dummy;
+            insert_element(first, tree_element, dummy, highlight, tree_output_func);
+        }
+
+        ostringstream out;
+        out << "Creating tree, added value " << test_array[i] << '.';
+        dump_tree(first, highlight, "creation", out.str());
     }
     std::cout << std::endl;
 
     tree_output_func->print_tree();
 
+    highlight_t highlight;
+
     std::map<std::string, std::function<void()>> funcs;
     funcs["help"] = []() {  help(); };
-    funcs["add_value"] = [&first, &tree_output_func]() { add_value(first, tree_output_func); };
+    funcs["add_value"] = [&first, &highlight, &tree_output_func]()
+    {
+        string label;
+        add_value(first, label, highlight, tree_output_func);
+        dump_tree(first, highlight, "tree", label);
+    };
     funcs["print_tree"] = [&tree_output_func]() { print_tree_f(tree_output_func); };
-    funcs["dump"] = [&first]() { dump_tree_dot(first); };
+    funcs["dump"] = [&first, &highlight]() { dump_tree(first, highlight, "tree", "Dump, difference from previous dump is highlighted."); };
     funcs["min_value"] = [&first]() { select_min_value(first); };
     funcs["max_value"] = [&first]() { select_max_value(first); };
-    funcs["search_value"] = [&first]() { tree_search(first); };
-    funcs["delete_value"] = [&first, &tree_output_func]() { delete_element(first, tree_output_func, first); };
+    funcs["search_value"] = [&first, &highlight]()
+    {
+        string label;
+        tree_search(first, label, highlight);
+        dump_tree(first, highlight, "tree", label);
+    };
+    funcs["delete_value"] = [&first, &highlight, &tree_output_func]()
+    {
+        string label;
+        delete_element(first, label, highlight, tree_output_func, first);
+        dump_tree(first, highlight, "tree", label);
+    };
     funcs["save_config"] = [&first]() { save_config(first); };
     funcs["exit"] = []() { exit(1); };
 
