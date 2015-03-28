@@ -17,9 +17,9 @@ namespace
         {
             out << ',';
             if (node.which_child == left_edge)
-                out << "left";
+                out << "left()";
             else
-                out << "right";
+                out << "right()";
             out << "_child_of_" << node.parent;
         }
         out << '"';
@@ -40,7 +40,7 @@ namespace
 
         out << ", label = \"";
         if (node)
-            out << node->element << " (" << node->colour << ") \", shape = box]\n";
+            out << node->element() << " (" << node->colour() << ") \", shape = box]\n";
         else
             out << "null\"]\n";
     }
@@ -71,22 +71,22 @@ namespace
             nodeid_t left_child;
             nodeid_t right_child;
 
-            if (node->left)
-                left_child = dump_node_dot(out, node->left, level + 1, highlight, next_highlight);
+            if (node->left())
+                left_child = dump_node_dot(out, node->left(), level + 1, highlight, next_highlight);
             else
             {
                 left_child = nodeid_t(nullptr, node, left_edge);
                 /* Это нужно чтобы узел "null" в графе был не один общий, а свой в каждом месте. */
-                dump_node(out, left_child, node->left, level + 1, highlight.node(left_child));
+                dump_node(out, left_child, node->left(), level + 1, highlight.node(left_child));
                 next_highlight.node(left_child, in_prev);
             }
 
-            if (node->right)
-                right_child = dump_node_dot(out, node->right, level + 1, highlight, next_highlight);
+            if (node->right())
+                right_child = dump_node_dot(out, node->right(), level + 1, highlight, next_highlight);
             else
             {
                 right_child = nodeid_t(nullptr, node, right_edge);
-                dump_node(out, right_child, node->right, level + 1, highlight.node(right_child));
+                dump_node(out, right_child, node->right(), level + 1, highlight.node(right_child));
                 next_highlight.node(right_child, in_prev);
             }
 

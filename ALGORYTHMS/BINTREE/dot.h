@@ -27,9 +27,9 @@ namespace dot
                  node_t up = nullptr,
                  edge_t which_child = none) :
         node(node),
-        parent(node ? node->up : up),
+        parent(node ? node->up() : up),
         which_child(which_child == none and parent ?
-                    (parent->left == node ? left_edge : right_edge) : which_child)
+                    (parent->left() == node ? left_edge : right_edge) : which_child)
         {
         }
 
@@ -47,7 +47,7 @@ namespace dot
     public:
         edgeid_t(node_t from,
                  edge_t direction) :
-        nodeid_t(from ? (direction == left_edge ? from->left : from->right) : nullptr,
+        nodeid_t(from ? (direction == left_edge ? from->left() : from->right()) : nullptr,
                  from,
                  direction)
         {
