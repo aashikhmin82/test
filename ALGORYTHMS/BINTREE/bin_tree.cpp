@@ -55,7 +55,7 @@ class Tree_Output
                 while (row_iter != (*matrix_iter).end()) 
                 {
                     if (*row_iter) 
-                        cout << (*row_iter)->element << "(" << (*row_iter)->colour << ") ";
+                        cout << (*row_iter)->element() << "(" << (*row_iter)->colour() << ") ";
                     else 
                         cout << "NULL ";
 
@@ -71,14 +71,14 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
 {
     highlight.node(root, visited);
 
-    if (root->element > bin_tree_element->element) 
+    if (root->element() > bin_tree_element->element()) 
     {
-        if (!root->left) 
+        if (!root->left()) 
         {
             element_num = element_num * 2;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
-            root->left = bin_tree_element;
-            bin_tree_element->up = root;
+            root->left() = bin_tree_element;
+            bin_tree_element->up() = root;
             highlight.edge(root, left_edge, added);
             highlight.leaf(bin_tree_element, added);
         } 
@@ -86,18 +86,18 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
         {
             ++level;
             element_num = element_num * 2;
-            insert_element(root->left, bin_tree_element, label, highlight, tree_func, level, element_num);
+            insert_element(root->left(), bin_tree_element, label, highlight, tree_func, level, element_num);
             highlight.edge(root, left_edge, visited);
         }
     } 
     else 
     {
-        if (!root->right) 
+        if (!root->right()) 
         {
             element_num = element_num * 2 + 1;
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
-            root->right = bin_tree_element;
-            bin_tree_element->up = root;
+            root->right() = bin_tree_element;
+            bin_tree_element->up() = root;
             highlight.edge(root, right_edge, added);
             highlight.leaf(bin_tree_element, added);
         } 
@@ -105,7 +105,7 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
         {
             ++level;
             element_num = element_num * 2 + 1;
-            insert_element(root->right, bin_tree_element, label, highlight, tree_func, level, element_num);
+            insert_element(root->right(), bin_tree_element, label, highlight, tree_func, level, element_num);
             highlight.edge(root, right_edge, visited);
         }
     }
@@ -124,11 +124,11 @@ void recreate_tree_f(Bin_Tree_Element *tree_el, Tree_Output *tree_func, size_t l
 
     tree_func->create_tree_to_output(level, element_num, *tree_el);
 
-    if (tree_el->left) 
+    if (tree_el->left()) 
     {
         ++level;
         element_num = element_num * 2;
-        recreate_tree_f(tree_el->left, tree_func, level, element_num);
+        recreate_tree_f(tree_el->left(), tree_func, level, element_num);
     }
     else 
         element_num = element_num * 2;
@@ -136,11 +136,11 @@ void recreate_tree_f(Bin_Tree_Element *tree_el, Tree_Output *tree_func, size_t l
     level = level_tmp;
     element_num = element_num_tmp;
 
-    if (tree_el->right) 
+    if (tree_el->right()) 
     {
         ++level;
         element_num = element_num * 2 + 1;
-        recreate_tree_f(tree_el->right, tree_func, level, element_num);
+        recreate_tree_f(tree_el->right(), tree_func, level, element_num);
     }
     else 
         element_num = element_num * 2 + 1;
@@ -181,18 +181,18 @@ void help()
 
 void select_max_value(const Bin_Tree_Element *root)
 {
-    if (root->right)
-        select_max_value(root->right);
+    if (root->right())
+        select_max_value(root->right());
     else
-        cout << "MAX Value : " << root->element << endl;
+        cout << "MAX Value : " << root->element() << endl;
 }
 
 void select_min_value(const Bin_Tree_Element *root)
 {
-    if (root->left)
-        select_min_value(root->left);
+    if (root->left())
+        select_min_value(root->left());
     else
-        cout << "MIN Value : " << root->element << endl;
+        cout << "MIN Value : " << root->element() << endl;
 }
 
 void tree_search(const Bin_Tree_Element *root, string& label, highlight_t& highlight, size_t search_el = 0)
@@ -215,63 +215,63 @@ void tree_search(const Bin_Tree_Element *root, string& label, highlight_t& highl
         cout << out.str() << endl;
         label += out.str();
     }
-    else if (root->element == search_el)
+    else if (root->element() == search_el)
     {
         highlight.node(root, found);
-        out << "Found : " << root->element << "\t Colour : " << root->colour;
+        out << "Found : " << root->element() << "\t Colour : " << root->colour();
         cout << out.str() << endl;
         label += out.str();
     }
     else
     {
         highlight.node(root, visited);
-        if (root->element > search_el)
+        if (root->element() > search_el)
         {
-            highlight.edge(root, left_edge, root->left ? visited : not_found);
+            highlight.edge(root, left_edge, root->left() ? visited : not_found);
             highlight.node(nodeid_t(nullptr, root, left_edge), not_found);
-            tree_search(root->left, label, highlight, search_el);
+            tree_search(root->left(), label, highlight, search_el);
         }
         else
         {
-            highlight.edge(root, right_edge, root->right ? visited : not_found);
+            highlight.edge(root, right_edge, root->right() ? visited : not_found);
             highlight.node(nodeid_t(nullptr, root, right_edge), not_found);
-            tree_search(root->right, label, highlight, search_el);
+            tree_search(root->right(), label, highlight, search_el);
         }
     }
 }
 
 void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_Tree_Element *root)
 {
-    if (del_el->up)
+    if (del_el->up())
     {
-        if ((del_el->up->left) and (del_el->up->left->element == del_el->element))
-            del_el->up->left = replace_el;
+        if ((del_el->up()->left()) and (del_el->up()->left()->element() == del_el->element()))
+            del_el->up()->left() = replace_el;
         else
-            del_el->up->right = replace_el;
+            del_el->up()->right() = replace_el;
     }
 
-    if (del_el->left)
+    if (del_el->left())
     {
-        replace_el->left = del_el->left;
-        del_el->left->up = replace_el;
+        replace_el->left() = del_el->left();
+        del_el->left()->up() = replace_el;
     }
 
-    if (del_el->right != replace_el)
+    if (del_el->right() != replace_el)
     {
-        if (replace_el->right)
-            replace_el->right->up = replace_el->up;
+        if (replace_el->right())
+            replace_el->right()->up() = replace_el->up();
 
-        replace_el->up->left = replace_el->right;
-        replace_el->right = del_el->right;
+        replace_el->up()->left() = replace_el->right();
+        replace_el->right() = del_el->right();
 
-        del_el->right->up = replace_el;
+        del_el->right()->up() = replace_el;
     }
 
-    if (del_el->up)
-        replace_el->up = del_el->up;
+    if (del_el->up())
+        replace_el->up() = del_el->up();
     else
     {
-        replace_el->up = nullptr;
+        replace_el->up() = nullptr;
         *root = *replace_el;
     }
 
@@ -296,24 +296,24 @@ void delete_element(Bin_Tree_Element *tree_el, string& label, highlight_t& highl
         cout << out.str() << endl;
         label += out.str();
     }
-    else if (tree_el->element == delete_el)
+    else if (tree_el->element() == delete_el)
     {
-        if ((tree_el->left) and (tree_el->right))
+        if ((tree_el->left()) and (tree_el->right()))
         {
-            if (!tree_el->right->left)
-                delete_replace(tree_el, tree_el->right, root);
+            if (!tree_el->right()->left())
+                delete_replace(tree_el, tree_el->right(), root);
             else
             {
-                Bin_Tree_Element *min_el = tree_el->right;
-                while (min_el->left)
-                    min_el = min_el->left;
+                Bin_Tree_Element *min_el = tree_el->right();
+                while (min_el->left())
+                    min_el = min_el->left();
 
                 delete_replace(tree_el, min_el, root);
             }
         }
-        else if ((!tree_el->left) and (!tree_el->right)) 
+        else if ((!tree_el->left()) and (!tree_el->right())) 
         {
-            if (!tree_el->up)
+            if (!tree_el->up())
             {
                 out << "Error: Unable to delete! Only one node.";
                 cerr << out.str() << endl;
@@ -321,57 +321,57 @@ void delete_element(Bin_Tree_Element *tree_el, string& label, highlight_t& highl
             }
             else
             {
-                Bin_Tree_Element *up_el = tree_el->up;
+                Bin_Tree_Element *up_el = tree_el->up();
 
-                if ((up_el->left) and (up_el->left->element == tree_el->element))
-                    tree_el->up->left = nullptr;
+                if ((up_el->left()) and (up_el->left()->element() == tree_el->element()))
+                    tree_el->up()->left() = nullptr;
                 else
-                    tree_el->up->right = nullptr;
+                    tree_el->up()->right() = nullptr;
             }
         } 
         else  
         {
-            if (!tree_el->up)
+            if (!tree_el->up())
             {
-                if (tree_el->left)
+                if (tree_el->left())
                 {
-                    tree_el->left->up = nullptr;
-                    *root = *tree_el->left;
+                    tree_el->left()->up() = nullptr;
+                    *root = *tree_el->left();
                 }
                 else
                 {
-                    tree_el->right->up = nullptr;
-                    *root = *tree_el->right;
+                    tree_el->right()->up() = nullptr;
+                    *root = *tree_el->right();
                 }
             }
             else
             {
-                Bin_Tree_Element *up_el = tree_el->up;
+                Bin_Tree_Element *up_el = tree_el->up();
 
-                if (tree_el->left)
+                if (tree_el->left())
                 {
-                    if ((up_el->left) and (up_el->left->element == tree_el->element))
+                    if ((up_el->left()) and (up_el->left()->element() == tree_el->element()))
                     {
-                        up_el->left = tree_el->left;
-                        tree_el->left->up = up_el;
+                        up_el->left() = tree_el->left();
+                        tree_el->left()->up() = up_el;
                     }
                     else
                     {
-                        up_el->right = tree_el->left;
-                        tree_el->left->up = up_el;
+                        up_el->right() = tree_el->left();
+                        tree_el->left()->up() = up_el;
                     }
                 }
                 else
                 {
-                    if ((up_el->left) and (up_el->left->element == tree_el->element))
+                    if ((up_el->left()) and (up_el->left()->element() == tree_el->element()))
                     {
-                        up_el->left = tree_el->right;
-                        tree_el->right->up = up_el;
+                        up_el->left() = tree_el->right();
+                        tree_el->right()->up() = up_el;
                     }
                     else
                     {
-                        up_el->right = tree_el->right;
-                        tree_el->right->up = up_el;
+                        up_el->right() = tree_el->right();
+                        tree_el->right()->up() = up_el;
                     }
                 }
             }
@@ -384,17 +384,17 @@ void delete_element(Bin_Tree_Element *tree_el, string& label, highlight_t& highl
     else
     {
         highlight.node(tree_el, visited);
-        if (tree_el->element > delete_el)
+        if (tree_el->element() > delete_el)
         {
-            highlight.edge(tree_el, left_edge, tree_el->left ? visited : not_found);
+            highlight.edge(tree_el, left_edge, tree_el->left() ? visited : not_found);
             highlight.node(nodeid_t(nullptr, tree_el, left_edge), not_found);
-            delete_element(tree_el->left, label, highlight, tree_func, root, delete_el);
+            delete_element(tree_el->left(), label, highlight, tree_func, root, delete_el);
         }
         else
         {
-            highlight.edge(tree_el, right_edge, tree_el->right ? visited : not_found);
+            highlight.edge(tree_el, right_edge, tree_el->right() ? visited : not_found);
             highlight.node(nodeid_t(nullptr, tree_el, right_edge), not_found);
-            delete_element(tree_el->right, label, highlight, tree_func, root, delete_el);
+            delete_element(tree_el->right(), label, highlight, tree_func, root, delete_el);
         }
     }
 
@@ -402,13 +402,13 @@ void delete_element(Bin_Tree_Element *tree_el, string& label, highlight_t& highl
 
 void config_to_file(ostream& out, const Bin_Tree_Element *node)
 {
-    out << node->element << "\n";
+    out << node->element() << "\n";
 
-    if (node->left)
-        config_to_file(out, node->left);
+    if (node->left())
+        config_to_file(out, node->left());
 
-    if (node->right)
-        config_to_file(out, node->right);
+    if (node->right())
+        config_to_file(out, node->right());
 }
 
 void save_config(const Bin_Tree_Element *root, string save_file = "test.txt")
