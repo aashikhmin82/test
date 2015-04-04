@@ -27,9 +27,9 @@ namespace dot
                  node_t up = nullptr,
                  edge_t which_child = none) :
         node(node),
-        parent(node ? node->up() : up),
+        parent(node ? node->up(false) : up),
         which_child(which_child == none and parent ?
-                    (parent->left() == node ? left_edge : right_edge) : which_child)
+                    (parent->left(false) == node ? left_edge : right_edge) : which_child)
         {
         }
 
@@ -47,7 +47,7 @@ namespace dot
     public:
         edgeid_t(node_t from,
                  edge_t direction) :
-        nodeid_t(from ? (direction == left_edge ? from->left() : from->right()) : nullptr,
+        nodeid_t(from ? (direction == left_edge ? from->left(false) : from->right(false)) : nullptr,
                  from,
                  direction)
         {
@@ -73,6 +73,8 @@ namespace dot
     private:
         using nodes_t = std::map<nodeid_t, color_t>;
         using edges_t = std::map<edgeid_t, color_t>;
+        using node_counters_t = std::map<nodeid_t, size_t>;
+        using edge_counters_t = std::map<edgeid_t, size_t>;
 
     public:
         void node(nodeid_t node,
@@ -88,38 +90,19 @@ namespace dot
             edges[edgeid_t(from, direction)] = color;
         }
 
-        void leaf(nodeid_t leaf,
-                  const color_t& color)
-        {
-            node(leaf, color);
-            edge(leaf.node, left_edge, color);
-            edge(leaf.node, right_edge, color);
-            node(nodeid_t(nullptr, leaf.node, left_edge), color);
-            node(nodeid_t(nullptr, leaf.node, right_edge), color);
-        }
-
-        color_t node(nodeid_t node) const
-        {
-            const auto i = nodes.find(node);
-            if (i != nodes.end())
-                return i->second;
-            else
-                return unmarked;
-        }
+        color_t node(nodeid_t node,
+                     highlight_t* next_highlight) const;
 
         color_t edge(node_t from,
-                     edge_t direction) const
-        {
-            const auto i = edges.find(edgeid_t(from, direction));
-            if (i != edges.end())
-                return i->second;
-            else
-                return unmarked;
-        }
+                     edge_t direction,
+                     highlight_t* next_highlight) const;
 
     private:
         nodes_t nodes;
         edges_t edges;
+
+        node_counters_t node_counters;
+        edge_counters_t edge_counters;
     };
 
 

@@ -69,8 +69,6 @@ class Tree_Output
 
 void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, string& label, highlight_t& highlight, Tree_Output *tree_func, size_t level = 1, size_t element_num = 1)
 {
-    highlight.node(root, visited);
-
     if (root->element() > bin_tree_element->element()) 
     {
         if (!root->left()) 
@@ -79,15 +77,12 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
             root->left() = bin_tree_element;
             bin_tree_element->up() = root;
-            highlight.edge(root, left_edge, added);
-            highlight.leaf(bin_tree_element, added);
         } 
         else 
         {
             ++level;
             element_num = element_num * 2;
             insert_element(root->left(), bin_tree_element, label, highlight, tree_func, level, element_num);
-            highlight.edge(root, left_edge, visited);
         }
     } 
     else 
@@ -98,15 +93,12 @@ void insert_element(Bin_Tree_Element *root, Bin_Tree_Element *bin_tree_element, 
             tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
             root->right() = bin_tree_element;
             bin_tree_element->up() = root;
-            highlight.edge(root, right_edge, added);
-            highlight.leaf(bin_tree_element, added);
         } 
         else 
         {
             ++level;
             element_num = element_num * 2 + 1;
             insert_element(root->right(), bin_tree_element, label, highlight, tree_func, level, element_num);
-            highlight.edge(root, right_edge, visited);
         }
     }
 }
@@ -124,11 +116,11 @@ void recreate_tree_f(Bin_Tree_Element *tree_el, Tree_Output *tree_func, size_t l
 
     tree_func->create_tree_to_output(level, element_num, *tree_el);
 
-    if (tree_el->left()) 
+    if (tree_el->left(false))
     {
         ++level;
         element_num = element_num * 2;
-        recreate_tree_f(tree_el->left(), tree_func, level, element_num);
+        recreate_tree_f(tree_el->left(false), tree_func, level, element_num);
     }
     else 
         element_num = element_num * 2;
@@ -136,11 +128,11 @@ void recreate_tree_f(Bin_Tree_Element *tree_el, Tree_Output *tree_func, size_t l
     level = level_tmp;
     element_num = element_num_tmp;
 
-    if (tree_el->right()) 
+    if (tree_el->right(false))
     {
         ++level;
         element_num = element_num * 2 + 1;
-        recreate_tree_f(tree_el->right(), tree_func, level, element_num);
+        recreate_tree_f(tree_el->right(false), tree_func, level, element_num);
     }
     else 
         element_num = element_num * 2 + 1;
@@ -217,26 +209,16 @@ void tree_search(const Bin_Tree_Element *root, string& label, highlight_t& highl
     }
     else if (root->element() == search_el)
     {
-        highlight.node(root, found);
         out << "Found : " << root->element() << "\t Colour : " << root->colour();
         cout << out.str() << endl;
         label += out.str();
     }
     else
     {
-        highlight.node(root, visited);
         if (root->element() > search_el)
-        {
-            highlight.edge(root, left_edge, root->left() ? visited : not_found);
-            highlight.node(nodeid_t(nullptr, root, left_edge), not_found);
             tree_search(root->left(), label, highlight, search_el);
-        }
         else
-        {
-            highlight.edge(root, right_edge, root->right() ? visited : not_found);
-            highlight.node(nodeid_t(nullptr, root, right_edge), not_found);
             tree_search(root->right(), label, highlight, search_el);
-        }
     }
 }
 
@@ -383,19 +365,10 @@ void delete_element(Bin_Tree_Element *tree_el, string& label, highlight_t& highl
     }
     else
     {
-        highlight.node(tree_el, visited);
         if (tree_el->element() > delete_el)
-        {
-            highlight.edge(tree_el, left_edge, tree_el->left() ? visited : not_found);
-            highlight.node(nodeid_t(nullptr, tree_el, left_edge), not_found);
             delete_element(tree_el->left(), label, highlight, tree_func, root, delete_el);
-        }
         else
-        {
-            highlight.edge(tree_el, right_edge, tree_el->right() ? visited : not_found);
-            highlight.node(nodeid_t(nullptr, tree_el, right_edge), not_found);
             delete_element(tree_el->right(), label, highlight, tree_func, root, delete_el);
-        }
     }
 
 }
@@ -522,16 +495,13 @@ int main(int argc, char* arg_vec[])
     {
         highlight_t highlight;
         Bin_Tree_Element *tree_element = new Bin_Tree_Element(test_array[i], "NON");
-        highlight.node(tree_element, added);
 
         if (i == 0)
         {
             string label = "Creating tree from scratch.";
-            highlight.node(nullptr, added);
             dump_tree(nullptr, highlight, "creation", label);
             first = tree_element;
             tree_output_func->create_tree_to_output(0, element_number, *first);
-            highlight.leaf(first, added);
         }
         else
         {

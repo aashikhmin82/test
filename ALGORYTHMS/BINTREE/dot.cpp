@@ -7,7 +7,7 @@
 using namespace dot;
 using namespace std;
 
-namespace
+namespace dot
 {
     ostream& operator<<(ostream& out,
                         nodeid_t node)
@@ -17,9 +17,9 @@ namespace
         {
             out << ',';
             if (node.which_child == left_edge)
-                out << "left()";
+                out << "left";
             else
-                out << "right()";
+                out << "right";
             out << "_child_of_" << node.parent;
         }
         out << '"';
@@ -27,6 +27,89 @@ namespace
         return out;
     }
 
+
+
+    namespace
+    {
+        bool accessed(const color_t& color)
+        {
+            return color == visited or color == not_found or color == added;
+        }
+    }
+
+
+
+    color_t highlight_t::node(nodeid_t node,
+                              highlight_t* next_highlight) const
+    {
+        const auto previous_count = node_counters.find(node);
+        size_t current_count = node.node ? node.node->element_counter() : 0;
+        color_t result = unmarked;
+        bool new_node = previous_count == node_counters.end();
+        bool edges_visited = false;
+
+        if (next_highlight)
+        {
+            next_highlight->node(node, in_prev);
+            next_highlight->node_counters[node] = current_count;
+        }
+
+        if (node.node)
+        {
+            color_t l = edge(node.node, left_edge, nullptr);
+            color_t r = edge(node.node, right_edge, nullptr);
+            edges_visited = accessed(l) or accessed(r);
+        }
+        else if (node.parent and edge(node.parent, node.which_child, nullptr) == not_found)
+            result = not_found;
+
+        if (previous_count->second < current_count)
+            result = edges_visited ? visited : found;
+
+        if (new_node)
+            result = node_counters.empty() ? unmarked : added;
+
+        const auto i = nodes.find(node);
+        if (i != nodes.end() and (i->second != in_prev or result == unmarked))
+            return i->second;
+
+        return result;
+    }
+
+    color_t highlight_t::edge(node_t from,
+                              edge_t direction,
+                              highlight_t* next_highlight) const
+    {
+        const auto edge_id = edgeid_t(from, direction);
+        const auto previous_count = edge_counters.find(edge_id);
+        size_t current_count = direction == left_edge ? from->left_counter() : from->right_counter();
+        color_t result = unmarked;
+        bool new_edge = previous_count == edge_counters.end();
+
+        if (next_highlight)
+        {
+            next_highlight->edge(from, direction, in_prev);
+            next_highlight->edge_counters[edge_id] = current_count;
+        }
+        else if (new_edge)
+            return added;
+
+        if (previous_count->second < current_count)
+            result = edge_id.node ? visited : not_found;
+
+        if (new_edge)
+            result = edge_counters.empty() ? unmarked : added;
+
+        const auto i = edges.find(edge_id);
+        if (i != edges.end() and (i->second != in_prev or result == unmarked))
+            return i->second;
+
+        return result;
+    }
+}
+
+namespace
+{
     void dump_node(ostream& out,
                    nodeid_t name,
                    const Bin_Tree_Element *node,
@@ -40,7 +123,7 @@ namespace
 
         out << ", label = \"";
         if (node)
-            out << node->element() << " (" << node->colour() << ") \", shape = box]\n";
+            out << node->element(false) << " (" << node->colour(false) << ") \", shape = box]\n";
         else
             out << "null\"]\n";
     }
@@ -63,37 +146,32 @@ namespace
                                         highlight_t& next_highlight)
     {
         nodeid_t node_id(node);
-        dump_node(out, node_id, node, level, highlight.node(node_id));
-        next_highlight.node(node_id, in_prev);
+        dump_node(out, node_id, node, level, highlight.node(node_id, &next_highlight));
 
         if (node)
         {
             nodeid_t left_child;
             nodeid_t right_child;
 
-            if (node->left())
-                left_child = dump_node_dot(out, node->left(), level + 1, highlight, next_highlight);
+            if (node->left(false))
+                left_child = dump_node_dot(out, node->left(false), level + 1, highlight, next_highlight);
             else
             {
                 left_child = nodeid_t(nullptr, node, left_edge);
                 /* Это нужно чтобы узел "null" в графе был не один общий, а свой в каждом месте. */
-                dump_node(out, left_child, node->left(), level + 1, highlight.node(left_child));
-                next_highlight.node(left_child, in_prev);
+                dump_node(out, left_child, node->left(false), level + 1, highlight.node(left_child, &next_highlight));
             }
 
-            if (node->right())
-                right_child = dump_node_dot(out, node->right(), level + 1, highlight, next_highlight);
+            if (node->right(false))
+                right_child = dump_node_dot(out, node->right(false), level + 1, highlight, next_highlight);
             else
             {
                 right_child = nodeid_t(nullptr, node, right_edge);
-                dump_node(out, right_child, node->right(), level + 1, highlight.node(right_child));
-                next_highlight.node(right_child, in_prev);
+                dump_node(out, right_child, node->right(false), level + 1, highlight.node(right_child, &next_highlight));
             }
 
-            dump_edge(out, node_id, left_child, highlight.edge(node, left_edge));
-            dump_edge(out, node_id, right_child, highlight.edge(node, right_edge));
-            next_highlight.edge(node, left_edge, in_prev);
-            next_highlight.edge(node, right_edge, in_prev);
+            dump_edge(out, node_id, left_child, highlight.edge(node, left_edge, &next_highlight));
+            dump_edge(out, node_id, right_child, highlight.edge(node, right_edge, &next_highlight));
         }
 
         return node_id;
