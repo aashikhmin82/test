@@ -207,17 +207,6 @@ void fix_rbtree(Bin_Tree_Element *root, Bin_Tree_Element *tree_element, Tree_Out
 
                 rotate(root,old_up_el->up(), tree_func);
             }
-            /*
-            else if ((tree_element->element() > root->element()) and (tree_element->up()->left()) and   
-                    (tree_element->up()->left() == tree_element))
-            {
-                Bin_Tree_Element* old_up_el = tree_element->up();
-                rotate(root, tree_element, tree_func);
-                old_up_el->up()->colour() = "black";
-                old_up_el->up()->up()->colour() = "red";
-                rotate(root,old_up_el->up(), tree_func);
-            }
-            */
             else
             {
                 tree_element->up()->colour() = "black";
@@ -240,41 +229,31 @@ void insert_element(Bin_Tree_Element *tree_element, Bin_Tree_Element *bin_tree_e
     {
         if (!tree_element->left()) 
         {
-            element_num = element_num * 2;
-            tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
+            tree_func->create_tree_to_output(level, element_num * 2, *bin_tree_element);
             tree_element->left() = bin_tree_element;
             bin_tree_element->up() = tree_element;
             if (rbtree)
                 fix_rbtree(root, bin_tree_element, tree_func);
         } 
         else 
-        {
-            ++level;
-            element_num = element_num * 2;
             insert_element(tree_element->left(), bin_tree_element, 
                             label, highlight, tree_func, rbtree, 
-                            level, element_num, root);
-        }
+                            ++level, element_num * 2, root);
     } 
     else 
     {
         if (!tree_element->right()) 
         {
-            element_num = element_num * 2 + 1;
-            tree_func->create_tree_to_output(level, element_num, *bin_tree_element);
+            tree_func->create_tree_to_output(level, element_num * 2 + 1, *bin_tree_element);
             tree_element->right() = bin_tree_element;
             bin_tree_element->up() = tree_element;
             if (rbtree)
                 fix_rbtree(root, bin_tree_element, tree_func);
         } 
         else 
-        {
-            ++level;
-            element_num = element_num * 2 + 1;
             insert_element(tree_element->right(), bin_tree_element, 
                             label, highlight, tree_func, rbtree, 
-                            level, element_num, root);
-        }
+                            ++level, element_num * 2 + 1, root);
     }
 }
 
@@ -390,15 +369,6 @@ void delete_replace(Bin_Tree_Element *del_el, Bin_Tree_Element *replace_el, Bin_
         del_el->right()->up() = replace_el;
     }
 
-/*
-    if (del_el->up())
-        replace_el->up() = del_el->up();
-    else
-    {
-        replace_el->up() = nullptr;
-        *root = *replace_el;
-    }
-    */
     replace_el->up() = del_el->up();
     if (not del_el->up())
             *root = *replace_el;
@@ -536,26 +506,15 @@ void search_and_rotate(Bin_Tree_Element *root, Tree_Output *tree_func, size_t se
         if (tree_el->element() == search_el)
         {
             cout << "Found : " << tree_el->element() << "\t Colour : " << tree_el->colour() << endl;
-//            tree_el = tree_el;
             rotate(root, tree_el, tree_func);
             break;
         }
         else if (tree_el->element() > search_el)
-        {
-            //    tree_search(tree_el->left, search_el);
             tree_el = tree_el->left();
-        }
         else
-        {
-            //  tree_search(tree_el->right, search_el);
             tree_el = tree_el->right();
-        }
     }
 }
-
-//    cout << "Left Rotate : " << endl;
-//    cout << "\t" << tree_el->element() << "\t" << tree_el->colour() << endl;
-//    cout << "\tUp: " << tree_el->up()->element() << "\t" << tree_el->up()->colour() << endl;
 
 void config_to_file(ostream& out, const Bin_Tree_Element *node)
 {
@@ -596,14 +555,11 @@ int main(int argc, char* arg_vec[])
     size_t size = 0;
     bool rbtree = 0;
     size_t arg_i = 1;
-//    size_t argproc = 0;
     string first_arg;
     vector<size_t> input_config;
 
     while (argc > 1)
-//    if (argc > 1)
     {
-//        istringstream in(arg_vec[1]);
         istringstream in(arg_vec[arg_i]);
         in >> first_arg;
 
@@ -623,8 +579,6 @@ int main(int argc, char* arg_vec[])
         }
         else if (first_arg == "--rb")
         {
-//            istringst0ream in(arg_vec[2]);
-//            in >> tr;
             rbtree = 1;
             --argc;
             ++arg_i;
