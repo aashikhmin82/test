@@ -1,8 +1,9 @@
 #include <fstream>
 #include <iostream>
 
-#include "bin_tree.h"
 #include "dot.h"
+
+#include "node.h"
 
 using namespace dot;
 using namespace std;
@@ -112,7 +113,7 @@ namespace
 {
     void dump_node(ostream& out,
                    nodeid_t name,
-                   const Bin_Tree_Element *node,
+                   const std::shared_ptr<Bin_Tree_Element> node,
                    size_t level,
                    const color_t& color)
     {
@@ -151,7 +152,7 @@ namespace
     }
 
     nodeid_t dump_node_dot(ostream& out,
-                                        const Bin_Tree_Element *node,
+                                        const std::shared_ptr<Bin_Tree_Element> node,
                                         size_t level,
                                         const highlight_t& highlight,
                                         highlight_t& next_highlight)
@@ -191,7 +192,7 @@ namespace
 
 namespace dot
 {
-    void dump_tree(const Bin_Tree_Element *root,
+    void dump_tree(const std::shared_ptr<Bin_Tree_Element> root,
                        highlight_t& highlight,
                        const string& prefix,
                        const string& label)

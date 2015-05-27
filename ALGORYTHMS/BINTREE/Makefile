@@ -1,9 +1,20 @@
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -std=c++11 -Wall -ggdb
 
-all: bin_tree
+all: tree
+#all: bin_tree
 
-bin_tree: bin_tree.o dot.o
+tree: tree.o bin_tree.o dot.o
 	$(CXX) -o $@ $^
+
+test_tree: test_tree.o bin_tree.o dot.o
+	$(CXX) -o $@ $^
+
+#bin_tree: bin_tree.o dot.o
+#	$(CXX) -o $@ $^
+
+tree.o: tree.cpp 
+
+test_tree.o: test_tree.cpp 
 
 bin_tree.o: bin_tree.h bin_tree.cpp
 

@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 
-#include "bin_tree.h"
+#include "node.h"
 
 namespace dot
 {
@@ -14,7 +14,7 @@ namespace dot
         right_edge
     };
 
-    using node_t = const Bin_Tree_Element*;
+    using node_t = std::shared_ptr<Bin_Tree_Element> ;
 
     class nodeid_t
     {
@@ -107,7 +107,7 @@ namespace dot
 
 
 
-    void dump_tree(const Bin_Tree_Element *root,
+    void dump_tree(const std::shared_ptr<Bin_Tree_Element> root,
                    highlight_t& highlight,
                    const std::string& prefix,
                    const std::string& label = "");
