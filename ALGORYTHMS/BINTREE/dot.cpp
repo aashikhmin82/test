@@ -95,11 +95,10 @@ namespace dot
         else if (new_edge)
             return added;
 
-        if (previous_count->second < current_count)
-            result = edge_id.node ? visited : not_found;
-
         if (new_edge)
             result = edge_counters.empty() ? unmarked : added;
+        else if (previous_count->second < current_count)
+            result = edge_id.node ? visited : not_found;
 
         const auto i = edges.find(edge_id);
         if (i != edges.end() and (i->second != in_prev or result == unmarked))
