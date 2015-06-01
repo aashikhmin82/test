@@ -142,6 +142,8 @@ int main(int argc, char* arg_vec[])
 
     highlight_t highlight;
 
+    bool run = true;
+
     std::map<std::string, std::function<void()>> funcs;
     funcs["help"] = []() {  help(); };
     funcs["add_value"] = [&first, &highlight, &tree_output_func, &rbtree, &debugf]()
@@ -169,10 +171,10 @@ int main(int argc, char* arg_vec[])
         dump_tree(first, highlight, "tree", label);
     };
     funcs["save_config"] = [&first]() { save_config(first); };
-    funcs["exit"] = []() { exit(1); };
+    funcs["exit"] = [&run]() { run = false; };
 
     string f_name;
-    while (1) 
+    while (run)
     {
         cout << "Please enter func_name or help : ";
         cin >> f_name;
