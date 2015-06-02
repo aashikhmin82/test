@@ -12,13 +12,13 @@ test_tree: test_tree.o bin_tree.o dot.o
 #bin_tree: bin_tree.o dot.o
 #	$(CXX) -o $@ $^
 
-tree.o: tree.cpp 
+tree.o: node.h tree.cpp
 
-test_tree.o: test_tree.cpp 
+test_tree.o: node.h test_tree.cpp
 
-bin_tree.o: bin_tree.h bin_tree.cpp
+bin_tree.o: node.h bin_tree.h bin_tree.cpp
 
-dot.o: dot.h dot.cpp
+dot.o: node.h dot.h dot.cpp
 
 %.dot: clean bin_tree FORCE
 	echo "10 dump add_value 777 add_value 888 add_value 666 search_value 777 delete_value 777 search_value 777 delete_value 777 add_value 777 add_value 777 add_value 777 exit" | tr ' ' '\n' | ./bin_tree || true
