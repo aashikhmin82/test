@@ -121,12 +121,15 @@ namespace
         if (color != unmarked)
             out << ", color = \"" << color << "\", fontcolor = \"" << color << '"';
 
-        if (node and node->colour(false) != "NON")
+//        if (node and node->colour(false) != "NON")
+        if (node and node->colour(false) != node_colour::none)
         {
             out << ", style = \"filled\", fillcolor = \"";
-            if (node->colour(false) == "red")
+//            if (node->colour(false) == "red")
+            if (node->colour(false) == node_colour::red)
                 out << "red3\"";
-            else if (node->colour(false) == "black")
+//            else if (node->colour(false) == "black")
+            else if (node->colour(false) == node_colour::black)
                 out << "gray90\"";
             else
                 out << "violet\"";

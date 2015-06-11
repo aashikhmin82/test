@@ -4,11 +4,14 @@
 #include <string>
 #include <memory>
 
+enum node_colour {red, black, none};
+
 class Bin_Tree_Element
 {
     private:
         size_t e;
-        std::string c;
+//        std::string c;
+        node_colour c;
         std::weak_ptr<Bin_Tree_Element> u;
         std::shared_ptr<Bin_Tree_Element> l = nullptr,
 //                         l = nullptr,
@@ -19,7 +22,8 @@ class Bin_Tree_Element
         mutable size_t rc = 0;
 
     public:
-        Bin_Tree_Element(const size_t& ar_el, const std::string ar_col) : e(ar_el), c(ar_col) {}
+//        Bin_Tree_Element(const size_t& ar_el, const std::string ar_col) : e(ar_el), c(ar_col) {}
+        Bin_Tree_Element(const size_t& ar_el, node_colour ar_col) : e(ar_el), c(ar_col) {}
 
         size_t element(bool update_counter = true) const
         {
@@ -27,7 +31,8 @@ class Bin_Tree_Element
                 ++ec;
             return e;
         }
-        std::string colour(bool update_counter = true) const { return c; }
+//        std::string colour(bool update_counter = true) const { return c; }
+        node_colour colour(bool update_counter = true) const { return c; }
 //        const std::shared_ptr<Bin_Tree_Element> up(bool update_counter = true) const
         const std::weak_ptr<Bin_Tree_Element> up(bool update_counter = true) const
         {
@@ -52,7 +57,8 @@ class Bin_Tree_Element
                 ++ec;
             return e;
         }
-        std::string& colour(bool update_counter = true)  { return c; }
+//        std::string& colour(bool update_counter = true)  { return c; }
+        node_colour& colour(bool update_counter = true)  { return c; }
 //        std::shared_ptr<Bin_Tree_Element>& up(bool update_counter = true)
         std::weak_ptr<Bin_Tree_Element>& up(bool update_counter = true)
         {

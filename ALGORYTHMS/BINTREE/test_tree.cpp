@@ -178,14 +178,14 @@ int main(int argc, char* arg_vec[])
         for (size_t i = 0; i < test_array.size(); ++i)
         {
             highlight_t highlight;
-            std::shared_ptr<Bin_Tree_Element> tree_element (make_shared<Bin_Tree_Element>(test_array[i], "red"));
+            std::shared_ptr<Bin_Tree_Element> tree_element (make_shared<Bin_Tree_Element>(test_array[i], node_colour::red));
 
             if (i == 0)
             {
                 string label = "Creating tree from scratch.";
                 dump_tree(nullptr, highlight, "creation", label);
                 first = tree_element;
-                first->colour() = "black";
+                first->colour() = node_colour::black;
                 tree_output_func->create_tree_to_output(0, element_number, first);
             }
             else

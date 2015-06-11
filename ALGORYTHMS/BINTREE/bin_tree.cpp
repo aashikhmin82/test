@@ -48,9 +48,9 @@ void recreate_tree_f(std::shared_ptr<Bin_Tree_Element> tree_el, std::shared_ptr<
 void rotate(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree_Element> tree_el, std::shared_ptr<Tree_Output> tree_func)
 {
     std::shared_ptr<Bin_Tree_Element> up_tree_el = (tree_el->up()).lock();
-    std::shared_ptr<Bin_Tree_Element> tmp_root (make_shared<Bin_Tree_Element>(0,"NON"));
+    std::shared_ptr<Bin_Tree_Element> tmp_root (make_shared<Bin_Tree_Element>(0,node_colour::none));
     *tmp_root = *root;
-    std::shared_ptr<Bin_Tree_Element> tree_el_tmp (make_shared<Bin_Tree_Element>(0,"NON"));
+    std::shared_ptr<Bin_Tree_Element> tree_el_tmp (make_shared<Bin_Tree_Element>(0,node_colour::none));
     *tree_el_tmp = *((tree_el->up()).lock());
     std::shared_ptr<Bin_Tree_Element> upup_tree_el = nullptr;
 
@@ -110,7 +110,8 @@ void rotate(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree_Ele
     *tree_el = *tree_el_tmp;
 
     if (not upup_tree_el)
-        root->colour() = "black";
+//        root->colour() = node_colour::black;
+        root->colour() = node_colour::black;
 
     recreate_tree_f(root, tree_func);
 }
@@ -134,19 +135,20 @@ void fix_rbtree(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree
         }
     }
 
-    if ((tree_element->colour() == "red") and ((tree_element->up()).lock()->colour() == "red"))
+    if ((tree_element->colour() == node_colour::red) and ((tree_element->up()).lock()->colour() == node_colour::red))
     {
-        if ((uncle_el) and (uncle_el->colour() == "red"))
+        if ((uncle_el) and (uncle_el->colour() == node_colour::red))
         {
-            (tree_element->up()).lock()->colour() = "black";
-            ((tree_element->up()).lock()->up()).lock()->colour() = "red";
-            uncle_el->colour() = "black";
-            root->colour() = "black";
+//            (tree_element->up()).lock()->colour() = node_colour::black;
+            (tree_element->up()).lock()->colour() = node_colour::black;
+            ((tree_element->up()).lock()->up()).lock()->colour() = node_colour::red;
+            uncle_el->colour() = node_colour::black;
+            root->colour() = node_colour::black;
 
             if (((((tree_element->up()).lock()->up()).lock()->up()).lock()) and (((((tree_element->up()).lock()->up()).lock()->up()).lock()->up()).lock()))
                 fix_rbtree(root, ((tree_element->up()).lock()->up()).lock(), tree_func);
         }
-        else if ((not uncle_el) or (uncle_el->colour() == "black"))
+        else if ((not uncle_el) or (uncle_el->colour() == node_colour::black))
         {
             std::shared_ptr<Bin_Tree_Element> sub_root = ((tree_element->up()).lock()->up()).lock();
 
@@ -166,15 +168,15 @@ void fix_rbtree(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree
 
                 rotate(root, tree_element, tree_func);
 
-                (tree_element->up()).lock()->colour() = "black";
-                ((tree_element->up()).lock()->up()).lock()->colour() = "red";
+                (tree_element->up()).lock()->colour() = node_colour::black;
+                ((tree_element->up()).lock()->up()).lock()->colour() = node_colour::red;
 
                 rotate(root,(tree_element->up()).lock(), tree_func);
             }
             else
             {
-                (tree_element->up()).lock()->colour() = "black";
-                ((tree_element->up()).lock()->up()).lock()->colour() = "red";
+                (tree_element->up()).lock()->colour() = node_colour::black;
+                ((tree_element->up()).lock()->up()).lock()->colour() = node_colour::red;
 
                 rotate(root, (tree_element->up()).lock(), tree_func);
             }
@@ -230,7 +232,7 @@ void add_value (std::shared_ptr<Bin_Tree_Element> first, string& label, highligh
     out << "Command: 'add " << value_to_add << "'. ";
     label = out.str();
 
-    std::shared_ptr<Bin_Tree_Element> tree_element (make_shared <Bin_Tree_Element>(value_to_add, "red"));
+    std::shared_ptr<Bin_Tree_Element> tree_element (make_shared <Bin_Tree_Element>(value_to_add, node_colour::red));
     insert_element(first, tree_element, label, highlight, tree_func, rbtree);
 }
 
@@ -454,12 +456,12 @@ void config_to_file(ostream& out, const std::shared_ptr<Bin_Tree_Element> node)
 
 void check_all_prop(std::shared_ptr<Bin_Tree_Element> element, const size_t way_black, size_t cur_way = 0)
 {
-    if (element->colour() == "black")
+    if (element->colour() == node_colour::black)
         ++cur_way;
     else
     {
-        if (not (((not element->right()) or (element->right()->colour() == "black")) and
-            ((not element->left()) or (element->left()->colour() == "black"))))
+        if (not (((not element->right()) or (element->right()->colour() == node_colour::black)) and
+            ((not element->left()) or (element->left()->colour() == node_colour::black))))
         {
             cout << "[DEBUG] FAILED -> not all black " << endl;
             throw logic_error("Incorrect red node.");
@@ -494,7 +496,7 @@ void check_rb(std::shared_ptr<Bin_Tree_Element> root, const bool debugf)
         std::shared_ptr<Bin_Tree_Element> element = root->left();
         while (element)
         {
-            if (element->colour() == "black")
+            if (element->colour() == node_colour::black)
                 ++way_black;
             element = element->left();
         }
