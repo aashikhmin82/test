@@ -25,9 +25,10 @@ namespace dot
 
         nodeid_t(node_t node = nullptr,
                  node_t up = nullptr,
+//                 node_t up,
                  edge_t which_child = none) :
         node(node),
-        parent(node ? node->up(false) : up),
+        parent(node ? (node->up(false)).lock() : up),
         which_child(which_child == none and parent ?
                     (parent->left(false) == node ? left_edge : right_edge) : which_child)
         {

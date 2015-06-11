@@ -41,13 +41,15 @@ class Tree_Output
         {
             if (bin_tree_struct.size() < level + 1)
             {
-                std::vector<std::shared_ptr<Bin_Tree_Element> > row(pow(2,level),nullptr);
+//                std::vector<std::shared_ptr<Bin_Tree_Element> > row(pow(2,level),nullptr);
+                std::vector<std::shared_ptr<Bin_Tree_Element> > row(1 << level,nullptr);
                 bin_tree_struct.push_back(row);
             }
 
             size_t element_array_num = 0;
             if (element_num != 0)
-                element_array_num = element_num - pow(2, level);
+//                element_array_num = element_num - pow(2, level);
+                element_array_num = element_num - (1 << level);
 
             bin_tree_struct[level][element_array_num] = obj_element;
         }
@@ -60,14 +62,16 @@ class Tree_Output
         void print_tree()
         {
             size_t i = 0;
-            size_t spaces_amount = (pow(2,bin_tree_struct.size() - 1) * 6 + pow(2,bin_tree_struct.size() - 1)) / 2;
+//            size_t spaces_amount = (pow(2,bin_tree_struct.size() - 1) * 6 + pow(2,bin_tree_struct.size() - 1)) / 2;
+            size_t spaces_amount = ((1 << (bin_tree_struct.size() - 1)) - 1) * 6 + (1 << (bin_tree_struct.size() - 1)) / 2;
 
             std::vector< std::vector<std::shared_ptr<Bin_Tree_Element> > >::iterator matrix_iter = bin_tree_struct.begin();
             while (matrix_iter != bin_tree_struct.end())
             {
                 std::string spaces(spaces_amount, ' ');
                 std::cout << i << " : " << spaces;
-                spaces_amount = spaces_amount - (5 * pow(2,i) / 2);
+//                spaces_amount = spaces_amount - (5 * pow(2,i) / 2);
+                spaces_amount = spaces_amount - (5 * (1 << i) / 2);
                 ++i;
                 std::vector<std::shared_ptr<Bin_Tree_Element> >::iterator row_iter = (*matrix_iter).begin();
                 while (row_iter != (*matrix_iter).end())

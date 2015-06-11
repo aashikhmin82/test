@@ -9,8 +9,9 @@ class Bin_Tree_Element
     private:
         size_t e;
         std::string c;
-        std::shared_ptr<Bin_Tree_Element> u = nullptr, 
-                         l = nullptr, 
+        std::weak_ptr<Bin_Tree_Element> u;
+        std::shared_ptr<Bin_Tree_Element> l = nullptr,
+//                         l = nullptr,
                          r = nullptr;
 
         mutable size_t ec = 0;
@@ -27,9 +28,10 @@ class Bin_Tree_Element
             return e;
         }
         std::string colour(bool update_counter = true) const { return c; }
-        const std::shared_ptr<Bin_Tree_Element> up(bool update_counter = true) const 
+//        const std::shared_ptr<Bin_Tree_Element> up(bool update_counter = true) const
+        const std::weak_ptr<Bin_Tree_Element> up(bool update_counter = true) const
         {
-            return u; 
+            return u;
         }
         const std::shared_ptr<Bin_Tree_Element> left(bool update_counter = true) const
         {
@@ -51,9 +53,10 @@ class Bin_Tree_Element
             return e;
         }
         std::string& colour(bool update_counter = true)  { return c; }
-        std::shared_ptr<Bin_Tree_Element>& up(bool update_counter = true)  
+//        std::shared_ptr<Bin_Tree_Element>& up(bool update_counter = true)
+        std::weak_ptr<Bin_Tree_Element>& up(bool update_counter = true)
         {
-            return u; 
+            return u;
         }
         std::shared_ptr<Bin_Tree_Element>& left(bool update_counter = true)
         {

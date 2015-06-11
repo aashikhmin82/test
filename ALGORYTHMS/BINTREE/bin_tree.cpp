@@ -19,7 +19,7 @@ void recreate_tree_f(std::shared_ptr<Bin_Tree_Element> tree_el, std::shared_ptr<
 {
     size_t level_tmp = level;
     if (level > 22)
-        throw new string("Maybe endless loop.");
+        throw logic_error("Maybe endless loop.");
 
     size_t element_num_tmp = element_num;
     if (level == 0)
@@ -33,7 +33,7 @@ void recreate_tree_f(std::shared_ptr<Bin_Tree_Element> tree_el, std::shared_ptr<
 
     if (tree_el->left(false))
         recreate_tree_f(tree_el->left(false), tree_func, level + 1, element_num * 2);
-    else 
+    else
         element_num = element_num * 2;
 
     level = level_tmp;
@@ -41,22 +41,22 @@ void recreate_tree_f(std::shared_ptr<Bin_Tree_Element> tree_el, std::shared_ptr<
 
     if (tree_el->right(false))
         recreate_tree_f(tree_el->right(false), tree_func, level + 1, element_num * 2 + 1);
-    else 
+    else
         element_num = element_num * 2 + 1;
 }
 
 void rotate(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree_Element> tree_el, std::shared_ptr<Tree_Output> tree_func)
 {
-    std::shared_ptr<Bin_Tree_Element> up_tree_el = tree_el->up();
-    std::shared_ptr<Bin_Tree_Element> tmp_root (new Bin_Tree_Element(0,"NON"));
+    std::shared_ptr<Bin_Tree_Element> up_tree_el = (tree_el->up()).lock();
+    std::shared_ptr<Bin_Tree_Element> tmp_root (make_shared<Bin_Tree_Element>(0,"NON"));
     *tmp_root = *root;
-    std::shared_ptr<Bin_Tree_Element> tree_el_tmp (new Bin_Tree_Element(0,"NON"));
-    *tree_el_tmp = *(tree_el->up());
-    std::shared_ptr<Bin_Tree_Element>  upup_tree_el = nullptr;
+    std::shared_ptr<Bin_Tree_Element> tree_el_tmp (make_shared<Bin_Tree_Element>(0,"NON"));
+    *tree_el_tmp = *((tree_el->up()).lock());
+    std::shared_ptr<Bin_Tree_Element> upup_tree_el = nullptr;
 
-    assert(tree_el->up());
-    if (tree_el->up()->up())
-            upup_tree_el = tree_el->up()->up();
+    assert((tree_el->up()).lock());
+    if (((tree_el->up()).lock()->up()).lock())
+            upup_tree_el = ((tree_el->up()).lock()->up()).lock();
     else
     {
         tree_el->up() = root;
@@ -71,13 +71,13 @@ void rotate(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree_Ele
    / \           / \
   a   b         b   c
 */
-    if ((tree_el->up()->right()) and (tree_el->up()->right() == tree_el))
+    if (((tree_el->up()).lock()->right()) and ((tree_el->up()).lock()->right() == tree_el))
     {
         tree_el_tmp->right() = tree_el->left();
         tree_el_tmp->up() = tree_el->up();
         
-        if (tree_el->up()->left())
-            tree_el->up()->left()->up() = tree_el;
+        if ((tree_el->up()).lock()->left())
+            (tree_el->up()).lock()->left()->up() = tree_el;
 
         if (tree_el->right())
             tree_el->right()->up() = tree_el->up();
@@ -99,17 +99,17 @@ void rotate(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree_Ele
         if (tree_el->left())
             tree_el->left()->up() = tree_el->up();
 
-        if (tree_el->up()->right())
-            tree_el->up()->right()->up() = tree_el;
+        if ((tree_el->up()).lock()->right())
+            (tree_el->up()).lock()->right()->up() = tree_el;
 
         tree_el->right() = tree_el;
     }
 
-    *(tree_el->up()) = *tree_el;
-    tree_el->up()->up() = upup_tree_el;
+    *((tree_el->up()).lock()) = *tree_el;
+    (tree_el->up()).lock()->up() = upup_tree_el;
     *tree_el = *tree_el_tmp;
 
-    if (!upup_tree_el)
+    if (not upup_tree_el)
         root->colour() = "black";
 
     recreate_tree_f(root, tree_func);
@@ -117,106 +117,106 @@ void rotate(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree_Ele
 
 void fix_rbtree(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Bin_Tree_Element> tree_element, std::shared_ptr<Tree_Output> tree_func)
 {
-    assert(tree_element->up());
+    assert((tree_element->up()).lock());
 
     std::shared_ptr<Bin_Tree_Element> uncle_el = nullptr;
-    if (tree_element->up()->up())
+    if (((tree_element->up()).lock()->up()).lock())
     {
-        if ((tree_element->up()->up()->left()) and (tree_element->up() == tree_element->up()->up()->left()))
+        if ((((tree_element->up()).lock()->up()).lock()->left()) and ((tree_element->up()).lock() == ((tree_element->up()).lock()->up()).lock()->left()))
         {
-            if (tree_element->up()->up()->right())
-                uncle_el = tree_element->up()->up()->right();
+            if (((tree_element->up().lock())->up()).lock()->right())
+                uncle_el = ((tree_element->up()).lock()->up()).lock()->right();
         }
         else
         {
-            if (tree_element->up()->up()->left())
-                uncle_el = tree_element->up()->up()->left();
+            if (((tree_element->up()).lock()->up()).lock()->left())
+                uncle_el = ((tree_element->up()).lock()->up()).lock()->left();
         }
     }
 
-    if ((tree_element->colour() == "red") and (tree_element->up()->colour() == "red"))
+    if ((tree_element->colour() == "red") and ((tree_element->up()).lock()->colour() == "red"))
     {
         if ((uncle_el) and (uncle_el->colour() == "red"))
         {
-            tree_element->up()->colour() = "black";
-            tree_element->up()->up()->colour() = "red";
+            (tree_element->up()).lock()->colour() = "black";
+            ((tree_element->up()).lock()->up()).lock()->colour() = "red";
             uncle_el->colour() = "black";
             root->colour() = "black";
 
-            if ((tree_element->up()->up()->up()) and (tree_element->up()->up()->up()->up()))
-                fix_rbtree(root, tree_element->up()->up(), tree_func);
+            if (((((tree_element->up()).lock()->up()).lock()->up()).lock()) and (((((tree_element->up()).lock()->up()).lock()->up()).lock()->up()).lock()))
+                fix_rbtree(root, ((tree_element->up()).lock()->up()).lock(), tree_func);
         }
-        else if ((!uncle_el) or (uncle_el->colour() == "black"))
+        else if ((not uncle_el) or (uncle_el->colour() == "black"))
         {
-            std::shared_ptr<Bin_Tree_Element> sub_root = tree_element->up()->up();
+            std::shared_ptr<Bin_Tree_Element> sub_root = ((tree_element->up()).lock()->up()).lock();
 
-            bool condition_a = 
-                (tree_element->element() < sub_root->element()) and 
-                (tree_element->up()->right()) and
-                (tree_element->up()->right() == tree_element);
+            bool element_in_left_branch =
+                (tree_element->element() < sub_root->element()) and
+                ((tree_element->up()).lock()->right()) and
+                ((tree_element->up()).lock()->right() == tree_element);
 
-            bool condition_b =
-                (tree_element->element() > sub_root->element()) and 
-                (tree_element->up()->left()) and
-                (tree_element->up()->left() == tree_element);
+            bool element_in_right_branch =
+                (tree_element->element() > sub_root->element()) and
+                ((tree_element->up()).lock()->left()) and
+                ((tree_element->up()).lock()->left() == tree_element);
 
-            if (condition_a or condition_b)
+            if (element_in_left_branch or element_in_right_branch)
             {
-                std::shared_ptr<Bin_Tree_Element>  old_up_el = tree_element->up();
+                std::shared_ptr<Bin_Tree_Element>  old_up_el = (tree_element->up()).lock();
 
                 rotate(root, tree_element, tree_func);
 
-                tree_element->up()->colour() = "black";
-                tree_element->up()->up()->colour() = "red";
+                (tree_element->up()).lock()->colour() = "black";
+                ((tree_element->up()).lock()->up()).lock()->colour() = "red";
 
-                rotate(root,tree_element->up(), tree_func);
+                rotate(root,(tree_element->up()).lock(), tree_func);
             }
             else
             {
-                tree_element->up()->colour() = "black";
-                tree_element->up()->up()->colour() = "red";
+                (tree_element->up()).lock()->colour() = "black";
+                ((tree_element->up()).lock()->up()).lock()->colour() = "red";
 
-                rotate(root, tree_element->up(), tree_func);
+                rotate(root, (tree_element->up()).lock(), tree_func);
             }
         }
     }
 }
 
-void insert_element(std::shared_ptr<Bin_Tree_Element> tree_element, std::shared_ptr<Bin_Tree_Element> bin_tree_element, 
-        string& label, highlight_t& highlight, std::shared_ptr<Tree_Output> tree_func, size_t rbtree, 
+void insert_element(std::shared_ptr<Bin_Tree_Element> tree_element, std::shared_ptr<Bin_Tree_Element> bin_tree_element,
+        string& label, highlight_t& highlight, std::shared_ptr<Tree_Output> tree_func, size_t rbtree,
         size_t level, size_t element_num, std::shared_ptr<Bin_Tree_Element> root)
 {
-    if (!root)
+    if (not root)
         root = tree_element;
 
-    if (tree_element->element() > bin_tree_element->element()) 
+    if (tree_element->element() > bin_tree_element->element())
     {
-        if (!tree_element->left()) 
+        if (not tree_element->left())
         {
             tree_func->create_tree_to_output(level, element_num * 2, bin_tree_element);
             tree_element->left() = bin_tree_element;
             bin_tree_element->up() = tree_element;
             if (rbtree)
                 fix_rbtree(root, bin_tree_element, tree_func);
-        } 
-        else 
-            insert_element(tree_element->left(), bin_tree_element, 
-                            label, highlight, tree_func, rbtree, 
+        }
+        else
+            insert_element(tree_element->left(), bin_tree_element,
+                            label, highlight, tree_func, rbtree,
                             ++level, element_num * 2, root);
-    } 
-    else 
+    }
+    else
     {
-        if (!tree_element->right()) 
+        if (not tree_element->right())
         {
             tree_func->create_tree_to_output(level, element_num * 2 + 1, bin_tree_element);
             tree_element->right() = bin_tree_element;
             bin_tree_element->up() = tree_element;
             if (rbtree)
                 fix_rbtree(root, bin_tree_element, tree_func);
-        } 
-        else 
-            insert_element(tree_element->right(), bin_tree_element, 
-                            label, highlight, tree_func, rbtree, 
+        }
+        else
+            insert_element(tree_element->right(), bin_tree_element,
+                            label, highlight, tree_func, rbtree,
                             ++level, element_num * 2 + 1, root);
     }
 }
@@ -230,7 +230,7 @@ void add_value (std::shared_ptr<Bin_Tree_Element> first, string& label, highligh
     out << "Command: 'add " << value_to_add << "'. ";
     label = out.str();
 
-    std::shared_ptr<Bin_Tree_Element> tree_element (new Bin_Tree_Element(value_to_add, "red"));
+    std::shared_ptr<Bin_Tree_Element> tree_element (make_shared <Bin_Tree_Element>(value_to_add, "red"));
     insert_element(first, tree_element, label, highlight, tree_func, rbtree);
 }
 
@@ -241,13 +241,13 @@ void print_tree_f(std::shared_ptr<Tree_Output> tree_func)
 
 void help()
 {
-    cout << "You can enter :\n" 
+    cout << "You can enter :\n"
         << "\thelp : Output this message.\n"
         << "\tadd_value [value]: Enter the size_t value to the tree.\n"
         << "\tsearch_value [value] : Search value.\n"
         << "\tdelete_value [value]: Delete value.\n"
-        << "\tprint_tree : Output the Tree.\n" 
-        << "\tdump : Dump the Tree.\n" 
+        << "\tprint_tree : Output the Tree.\n"
+        << "\tdump : Dump the Tree.\n"
         << "\tmin_value : Print Min value.\n"
         << "\tmax_value : Print Max value.\n"
         << "\tsave_config [filename] : Save config.\n"
@@ -285,7 +285,7 @@ void tree_search(const std::shared_ptr<Bin_Tree_Element> root, string& label, hi
 
     ostringstream out;
 
-    if (!root)
+    if (not root)
     {
         out << "Not found!";
         cout << out.str() << endl;
@@ -329,7 +329,7 @@ void delete_tree_el(std::shared_ptr<Bin_Tree_Element> tree_el, string& label, hi
                 {
                     while (replace_el->left())
                         replace_el = replace_el->left();
-                    replace_el->up()->left() = replace_el->right();
+                    (replace_el->up()).lock()->left() = replace_el->right();
 
                     if (replace_el->right())
                         replace_el->right()->up() = replace_el->up();
@@ -343,28 +343,27 @@ void delete_tree_el(std::shared_ptr<Bin_Tree_Element> tree_el, string& label, hi
 
                 delete_replace(tree_el, replace_el, root);
         }
-        else if ((!tree_el->left()) and (!tree_el->right())) 
+        else if ((not tree_el->left()) and (not tree_el->right()))
         {
-            if (!tree_el->up())
+            if (not (tree_el->up()).lock())
             {
                 out << "Error: Unable to delete! Only one node.";
                 cerr << out.str() << endl;
                 label += out.str();
             }
             else
-               
             {
-                std::shared_ptr<Bin_Tree_Element> up_el = tree_el->up();
+                std::shared_ptr<Bin_Tree_Element> up_el = (tree_el->up()).lock();
 
                 if (up_el->left() == tree_el)
-                    tree_el->up()->left() = nullptr;
+                    (tree_el->up()).lock()->left() = nullptr;
                 else
                 {
-                    tree_el->up()->right() = nullptr;
-                 }
+                    (tree_el->up()).lock()->right() = nullptr;
+                }
             }
-        } 
-        else  
+        }
+        else
         {
                 if (tree_el->left())
                 {
@@ -398,7 +397,7 @@ void delete_element(std::shared_ptr<Bin_Tree_Element> tree_el, string& label, hi
     }
 
     ostringstream out;
-    if (!tree_el)
+    if (not tree_el)
     {
         out << "Not found!";
         cout << out.str() << endl;
@@ -458,16 +457,14 @@ void check_all_prop(std::shared_ptr<Bin_Tree_Element> element, const size_t way_
     if (element->colour() == "black")
         ++cur_way;
     else
-        if (((!element->right()) or (element->right()->colour() == "black")) and 
-            ((!element->left()) or (element->left()->colour() == "black")))
-        {
-            cout << "[DEBUG] PASSED -> all_black" << endl;
-        }
-        else
+    {
+        if (not (((not element->right()) or (element->right()->colour() == "black")) and
+            ((not element->left()) or (element->left()->colour() == "black"))))
         {
             cout << "[DEBUG] FAILED -> not all black " << endl;
-            throw new string("Incorrect red node.");
+            throw logic_error("Incorrect red node.");
         }
+    }
 
     if (element->left())
         check_all_prop(element->left(), way_black, cur_way);
@@ -475,22 +472,20 @@ void check_all_prop(std::shared_ptr<Bin_Tree_Element> element, const size_t way_
     if (element->right())
         check_all_prop(element->right(), way_black, cur_way);
 
-    if ((!element->left()) or (!element->right()))
+    if ((not element->left()) or (not element->right()))
     {
         ++cur_way;
-        if (way_black == cur_way)
-            cout << "[DEBUG] PASSED: " << element->element() << " Black Way : " << way_black << "  " << "Current way : " << cur_way << endl;
-        else
+        if (not (way_black == cur_way))
         {
             cout << "[DEBUG] FAILED!!!: " << element->element() << " Black Way : " << way_black << "  " << "Current way : " << cur_way << endl;
-            throw new string("Incorrect number of black nodes in the way.");
+            throw logic_error("Incorrect number of black nodes in the way.");
         }
     }
 }
 
 void check_rb(std::shared_ptr<Bin_Tree_Element> root, const bool debugf)
 {
-    if (!debugf)
+    if (not debugf)
         return;
 
     size_t way_black = 1;
@@ -547,5 +542,5 @@ size_t nrand(size_t n)
     while(r >= n);
 
     return r;
-} 
+}
 

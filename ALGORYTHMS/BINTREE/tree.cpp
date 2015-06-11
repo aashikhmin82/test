@@ -72,8 +72,8 @@ int main(int argc, char* arg_vec[])
     }
     
     std::cout << "Binary Tree" << std::endl;
-    std::shared_ptr<Tree_Output> tree_output_func (new Tree_Output);
-    std::shared_ptr<Tree_Output> tree_output_func1 (new Tree_Output);
+    std::shared_ptr<Tree_Output> tree_output_func (make_shared<Tree_Output>());
+    std::shared_ptr<Tree_Output> tree_output_func1 (make_shared<Tree_Output>());
     *tree_output_func = *tree_output_func1;
 
     srand( static_cast<size_t>(time(nullptr)) );
@@ -112,10 +112,10 @@ int main(int argc, char* arg_vec[])
 
     std::cout << "Test array : ";
     element_number = 1;
-    for (size_t i = 0; i < test_array.size(); ++i) 
+    for (size_t i = 0; i < test_array.size(); ++i)
     {
         highlight_t highlight;
-        std::shared_ptr<Bin_Tree_Element> tree_element (new Bin_Tree_Element(test_array[i], "red"));
+        std::shared_ptr<Bin_Tree_Element> tree_element (make_shared<Bin_Tree_Element>(test_array[i], "red"));
 
         if (i == 0)
         {
@@ -179,7 +179,7 @@ int main(int argc, char* arg_vec[])
         cout << "Please enter func_name or help : ";
         cin >> f_name;
 
-        try 
+        try
         {
             funcs[f_name]();
         }
