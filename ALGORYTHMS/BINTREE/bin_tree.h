@@ -110,8 +110,8 @@ void select_min_value(const std::shared_ptr<Bin_Tree_Element> root);
 void tree_search(const std::shared_ptr<Bin_Tree_Element> root, std::string& label, dot::highlight_t& highlight, size_t search_el = 0);
 
 void delete_replace(std::shared_ptr<Bin_Tree_Element> del_el, std::shared_ptr<Bin_Tree_Element> replace_el, std::shared_ptr<Bin_Tree_Element> root);
-void delete_tree_el(std::shared_ptr<Bin_Tree_Element> tree_el, std::string& label, dot::highlight_t& highlight, std::shared_ptr<Tree_Output> tree_func, std::shared_ptr<Bin_Tree_Element> root);
-void delete_element(std::shared_ptr<Bin_Tree_Element> tree_el, std::string& label, dot::highlight_t& highlight, std::shared_ptr<Tree_Output> tree_func, std::shared_ptr<Bin_Tree_Element> root, size_t delete_el = 0);
+void delete_tree_el(std::shared_ptr<Bin_Tree_Element> tree_el, std::string& label, dot::highlight_t& highlight, std::shared_ptr<Tree_Output> tree_func, std::shared_ptr<Bin_Tree_Element> root, bool rbtree);
+void delete_element(std::shared_ptr<Bin_Tree_Element> tree_el, std::string& label, dot::highlight_t& highlight, std::shared_ptr<Tree_Output> tree_func, std::shared_ptr<Bin_Tree_Element> root, bool rbtree, size_t delete_el = 0);
 void search_and_rotate(std::shared_ptr<Bin_Tree_Element> root, std::shared_ptr<Tree_Output> tree_func, size_t search_el = 0);
 void config_to_file(std::ostream& out, const std::shared_ptr<Bin_Tree_Element> node);
 void save_config(const std::shared_ptr<Bin_Tree_Element> root, std::string save_file = "test.txt");

@@ -164,10 +164,11 @@ int main(int argc, char* arg_vec[])
         tree_search(first, label, highlight);
         dump_tree(first, highlight, "tree", label);
     };
-    funcs["delete_value"] = [&first, &highlight, &tree_output_func]()
+    funcs["delete_value"] = [&first, &highlight, &tree_output_func, &rbtree, &debugf]()
     {
         string label;
-        delete_element(first, label, highlight, tree_output_func, first);
+        delete_element(first, label, highlight, tree_output_func, first, rbtree);
+        check_rb(first, debugf);
         dump_tree(first, highlight, "tree", label);
     };
     funcs["save_config"] = [&first]() { save_config(first); };

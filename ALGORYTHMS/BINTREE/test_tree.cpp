@@ -129,7 +129,7 @@ int main(int argc, char* arg_vec[])
     tests_data[num_of_tests] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
     expect_add_res[num_of_tests] = {8, 4, 2, 1, 3, 6, 5, 7, 12, 10, 9, 11, 16, 14, 13, 15, 18, 17, 19, 20};
     del_el[num_of_tests] = {1,2,4,5,7,8,10,11,13,14,16,17,19,20};
-    expect_del_res[num_of_tests] = {9, 6, 3, 12, 18, 15};
+    expect_del_res[num_of_tests] = {12, 6, 3, 9, 18, 15};
     ++num_of_tests;
 
 //    tests_data[num_of_tests] = {20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1};
@@ -143,7 +143,7 @@ int main(int argc, char* arg_vec[])
     tests_data[num_of_tests] = {60,66,62,10,50,5,90,11,55,80,85,91,75,6,12,65,14,92,35,40,70,1,15,18,68,3,7,44,45,2,8};
     expect_add_res[num_of_tests] = {62,12,10,5,2,1,3,7,6,8,11,50,35,15,14,18,44,40,45,60,55,80,66,65,70,68,75,90,85,91,92};
     del_el[num_of_tests] = {62,10,50,5,90,11,55,80,85,91,75,6,12,65,14,92,35,40,70,1,15,18,68,3,7};
-    expect_del_res[num_of_tests] = {66,44,8,2,60,45};
+    expect_del_res[num_of_tests] = {44,8,2,60,45,66};
     ++num_of_tests;
 
     size_t indx = 0;
@@ -232,7 +232,9 @@ int main(int argc, char* arg_vec[])
         for (auto del_element : del_el[indx])
         {
             cout << del_element << " ";
-            delete_element(first, label, highlight, tree_output_func, first, del_element);
+            delete_element(first, label, highlight, tree_output_func, first, rbtree, del_element);
+
+            check_rb(first, debugf);
         }
         cout << endl;
 
