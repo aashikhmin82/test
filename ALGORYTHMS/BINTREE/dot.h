@@ -28,7 +28,7 @@ namespace dot
 //                 node_t up,
                  edge_t which_child = none) :
         node(node),
-        parent(node ? (node->up(false)).lock() : up),
+        parent(node ? node->up(false) : up),
         which_child(which_child == none and parent ?
                     (parent->left(false) == node ? left_edge : right_edge) : which_child)
         {

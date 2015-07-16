@@ -30,9 +30,12 @@ class Bin_Tree_Element
             return e;
         }
         node_colour colour(bool update_counter = true) const { return c; }
-        const std::weak_ptr<Bin_Tree_Element> up(bool update_counter = true) const
+//        const std::weak_ptr<Bin_Tree_Element> up(bool update_counter = true) const
+        const std::shared_ptr<Bin_Tree_Element> up(bool update_counter = true) const
         {
-            return u;
+//            return u;
+            return u.lock();
+//            return u.get();
         }
         const std::shared_ptr<Bin_Tree_Element> left(bool update_counter = true) const
         {
@@ -55,10 +58,22 @@ class Bin_Tree_Element
         }
 //        std::string& colour(bool update_counter = true)  { return c; }
         node_colour& colour(bool update_counter = true)  { return c; }
-//        std::shared_ptr<Bin_Tree_Element>& up(bool update_counter = true)
-        std::weak_ptr<Bin_Tree_Element>& up(bool update_counter = true)
+        std::shared_ptr<Bin_Tree_Element> up(bool update_counter = true)
+//        std::weak_ptr<Bin_Tree_Element>& up(bool update_counter = true)
+        {
+//            return u;
+//            std::shared_ptr<Bin_Tree_Element> u1; 
+//            u1 = u.lock();
+//            return u.lock();
+            return u.lock();
+        }
+        std::weak_ptr<Bin_Tree_Element>& weak_up(bool update_counter = true)
         {
             return u;
+//            std::shared_ptr<Bin_Tree_Element> u1; 
+//            u1 = u.lock();
+//            return u.lock();
+//            return u.lock();
         }
         std::shared_ptr<Bin_Tree_Element>& left(bool update_counter = true)
         {
