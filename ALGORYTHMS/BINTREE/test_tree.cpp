@@ -232,14 +232,10 @@ int main(int argc, char* arg_vec[])
         for (auto del_element : del_el[indx])
         {
             cout << del_element << " ";
-            cout << "[DEBUG] : Delete element." << endl;
-            cout << "[DEBUG] : " << first << "  -> DE : " << del_element << endl;
             delete_element(first, label, highlight, tree_output_func, first, rbtree, del_element);
 
-            cout << "[DEBUG] : Check RB." << endl;
             check_rb(first, debugf);
         }
-            cout << "[DEBUG] : END of For." << endl;
         cout << endl;
 
         std::shared_ptr<test_vector> test_del_result (make_shared<test_vector>());
