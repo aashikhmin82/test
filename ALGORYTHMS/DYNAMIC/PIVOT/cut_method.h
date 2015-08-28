@@ -102,26 +102,6 @@ class dynamic_db
             size_t max_price = price[length];
             size_t price_debug = 0;
 
-            if (length == 1)
-            {
-                if (cur_nest == 0)
-                {
-                    schem_plan.push_back(part1);
-                    schem_plan.push_back(part2);
-                    std::cout << "[DEBUG] L : " << length << " " << part1 << " " << part2 << std::endl;
-                    db[length].push_back(part1);
-                    db[length].push_back(part2);
-                }
-
-                if ( db_util.find(length) != db_util.end() )
-                {
-                    price_debug = db_util[length];
-                }
-                std::cout << "[DEBUG A] Price : " << max_price << "  Length : " << length << std::endl;
-                std::cout << "[DEBUG A] Price_debug : " << price_debug << std::endl;
-                return max_price;
-            }
-            
             size_t tmp_price = 0;
             for (size_t first_cut = 1; first_cut < length; ++first_cut)
             {
@@ -152,16 +132,18 @@ class dynamic_db
                 db[length].push_back(part2);
             }
 
-                if ( db_util.find(length) != db_util.end() )
-                {
-                    price_debug = db_util[length];
-                }
-                std::cout << "[DEBUG B] Price : " << max_price << "  Length : " << length << std::endl;
-                std::cout << "[DEBUG B] Price_debug : " << price_debug << std::endl;
-                if ( db_util.find(length) == db_util.end() )
-                {
-                    db_util[length] = max_price;
-                }
+            if ( db_util.find(length) != db_util.end() )
+            {
+                price_debug = db_util[length];
+            }
+            std::cout << "[DEBUG B] Price : " << max_price << "  Length : " << length << std::endl;
+            std::cout << "[DEBUG B] Price_debug : " << price_debug << std::endl;
+
+            if ( length != 1 and db_util.find(length) == db_util.end() )
+            {
+                db_util[length] = max_price;
+            }
+
             return max_price;
         }
 };
