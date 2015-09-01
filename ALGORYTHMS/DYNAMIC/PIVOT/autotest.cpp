@@ -29,7 +29,7 @@ void check_rand_result (size_t pivot_to_cut, dynamic_db pivot_obj)
     size_t index = 0;
     size_t pivot_res = 0;
     cout << "Check Rand autotest result : " << endl;
-    for (auto vec_el : result)
+    for (const auto vec_el : result)
     {
         cout << index << " : " << vec_el << endl;
         pivot_res = pivot_res + vec_el;
@@ -61,7 +61,7 @@ int main()
     pivot1.print_price();
 
     cout << "Price : " << endl;
-    for (auto price_val : prices)
+    for (const auto price_val : prices)
     {
         cout << price_val << endl;
     }

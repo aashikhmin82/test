@@ -10,14 +10,15 @@ using pivot_list_t = std::vector<pivot_t>;
 class dynamic_db
 {
     private:
-//        std::vector <size_t> price;
+        struct price_plan
+        {
+            size_t price; 
+            std::vector<size_t> plan;
+        };
         price_list_t price;
-//        std::vector <size_t> scheme_plan;
         pivot_list_t scheme_plan;
-//        std::vector <size_t> result_scheme;
         pivot_list_t result_scheme;
-        std::map<size_t, std::vector<size_t>> db;
-        std::map<size_t, size_t> db_util;
+        std::map<size_t, price_plan> db;
 
     public:
         dynamic_db(const std::vector<size_t>& price_tab) : price(price_tab) {}
@@ -58,24 +59,19 @@ class dynamic_db
 
         void erase_old_pivot()
         {
-//            result_scheme.erase(result_schem.begin(), result_schem.end());
             result_scheme.clear();
             result_scheme.shrink_to_fit();
         }
 
         void debug_print_db()
         {
-//            for (auto it = db.begin(); it != db.end(); ++it)
             for (const auto& db_el : db)
             {
-//                std::cout << "[DEBUG] " << (*it).first << " : ";
                 std::cout << "[DEBUG] " << db_el.first << " : ";
-//                for (auto el : db[(*it).first])
-//                for (auto el : db[db_el->first])
-                for (const auto& el : db[db_el.first])
-                {
+
+                for (const auto& el : db[db_el.first].plan)
                     std::cout << el << " ";
-                }
+
                 std::cout << "\n";
             }
         }
@@ -87,17 +83,15 @@ class dynamic_db
             cut_long(length);
 
             result_scheme.push_back(scheme_plan[0]);
-//            if (scheme_plan[1])
             rest = scheme_plan[1];
 
             if (rest == 0)
             {
                 std::cout << "DB_UTIL : " << std::endl;
-//                for (std::map<size_t, size_t>::const_iterator i = db_util.begin(), end = db_util.end(); i != end; ++i)
-                for (const auto& i : db_util)
-                {
-                    std::cout << i.first << " : " << i.second << std::endl;
-                }
+
+                for (const auto& i : db)
+                    std::cout << i.first << " : " << i.second.price << std::endl;
+
             }
             else
             {
@@ -116,21 +110,20 @@ class dynamic_db
             size_t max_price = price[length];
             size_t price_debug = 0;
 
-            if (( db_util.find(length) != db_util.end() ) and (cur_nest != 0)) 
+/*
+            if (( db.find(length) != db.end() ) and (cur_nest != 0)) 
             {
-
-                std::cout << "[DEBUG] A1!" << std::endl;
-                price_debug = db_util[length];
-                std::cout << "[DEBUG BUFFER] Max Price : " << price_debug << std::endl;
+                price_debug = db[length].price;
                 return price_debug;
             }
+            */
 
             size_t tmp_price = 0;
             for (size_t first_cut = 1; first_cut < length; ++first_cut)
             {
-                if ( db_util.find(length - first_cut) != db_util.end() )
+                if ( db.find(length - first_cut) != db.end() )
                 {
-                    tmp_price = price[first_cut] + db_util[length - first_cut];
+                    tmp_price = price[first_cut] + db[length - first_cut].price;
                 }
                 else
                 {
@@ -151,20 +144,18 @@ class dynamic_db
                 scheme_plan.push_back(part1);
                 scheme_plan.push_back(part2);
                 std::cout << "[DEBUG] L2 : " << length << " " << part1 << " " << part2 << std::endl;
-                db[length].push_back(part1);
-                db[length].push_back(part2);
+                db[length].plan.push_back(part1);
+                db[length].plan.push_back(part2);
             }
 
-            if ( db_util.find(length) != db_util.end() )
-                price_debug = db_util[length];
+            if ( db.find(length) != db.end() )
+                price_debug = db[length].price;
 
             std::cout << "[DEBUG B] Price : " << max_price << "  Length : " << length << std::endl;
             std::cout << "[DEBUG B] Price_debug : " << price_debug << std::endl;
 
-            if ( length != 1 and db_util.find(length) == db_util.end() )
-            {
-                db_util[length] = max_price;
-            }
+            if ( length != 1 and db.find(length) == db.end() )
+                db[length].price = max_price;
 
             return max_price;
         }
