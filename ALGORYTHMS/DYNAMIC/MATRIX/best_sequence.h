@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <cassert>
+#include <limits>
 
 using namespace std;
 
@@ -10,35 +12,33 @@ class best_sequence
         vector <vector <size_t>> min_sum_tab;
 
     public:
-        best_sequence (const std::vector<size_t> input_matrix) : matrix(input_matrix) {}
+        best_sequence (const std::vector<size_t> input_matrix) : matrix(input_matrix) { 
+            assert(input_matrix.size() >= 2);
+        }
 
         void print_matrix() const
         {
-            size_t raw = matrix[0];
-            size_t colons = matrix[1];
-            cout << "[DEBUG][BS] : " << raw << " * " << colons << endl;
+            size_t row = matrix[0];
 
-            raw = colons;
-            for (size_t i = 2; i < matrix.size(); ++i)
+            for (size_t i = 1; i < matrix.size(); ++i)
             {
-                cout << "[DEBUG][BS] : " << raw << " * " << matrix[i] << endl;
-                raw = matrix[i];
+                cout << "[DEBUG][BS] : " << row << " * " << matrix[i] << endl;
+                row = matrix[i];
             }
         }
 
         void min_sum()
         {
-            size_t raw = matrix[0];
-            size_t colons = matrix[1];
-            size_t min_sum = 0;
-            vector <vector <size_t>> min_sum_tab_tmp(matrix.size(), vector<size_t>(matrix.size(),0));
+            size_t row = matrix[0];
+            size_t columns = matrix[1];
+//            vector <vector <size_t>> min_sum_tab_tmp(matrix.size(), vector<size_t>(matrix.size(),0));
+            vector <vector <size_t>> min_sum_tab_tmp(matrix.size(), vector<size_t>(matrix.size(),numeric_limits<size_t>::max()));
 
             for (size_t i = 2; i < matrix.size(); ++i)
             {
-                min_sum = raw * colons * matrix[i];
-                raw = colons;
-                colons = matrix[i];
-                min_sum_tab_tmp[i-1][i] = min_sum;
+                min_sum_tab_tmp[i-1][i] = row * columns * matrix[i];
+                row = columns;
+                columns = matrix[i];
             }
 
             for (size_t j = 3; j < matrix.size(); ++j)
@@ -50,17 +50,15 @@ class best_sequence
 
                     size_t low_matrix = i - j + 1;
                     size_t high_matrix = i;
-                    size_t tmp_min_sum = 0;
                     for (size_t k = low_matrix; k < high_matrix; ++k)
                     {
 //                        cout << "[DEB] [" << low_matrix << "," << k << "] + [" << k + 1 << "," << high_matrix << "] + " << matrix[low_matrix - 1] << "*" << matrix[k] << "*" << matrix[high_matrix];
 //                        cout << " <-> " << min_sum_tab_tmp[low_matrix][k] << " + " << min_sum_tab_tmp[k + 1][high_matrix] << " + " << matrix[low_matrix - 1] * matrix[k] * matrix[high_matrix];
 
-                        tmp_min_sum = min_sum_tab_tmp[low_matrix][k] + min_sum_tab_tmp[k + 1][high_matrix] + matrix[low_matrix - 1] * matrix[k] * matrix[high_matrix];
+                        size_t tmp_min_sum = min_sum_tab_tmp[low_matrix][k] + min_sum_tab_tmp[k + 1][high_matrix] + matrix[low_matrix - 1] * matrix[k] * matrix[high_matrix];
 //                        cout << " = " << tmp_min_sum << endl;
 
-                        if ((min_sum_tab_tmp[low_matrix][high_matrix] > tmp_min_sum) or (min_sum_tab_tmp[low_matrix][high_matrix] == 0))
-                            min_sum_tab_tmp[low_matrix][high_matrix] = tmp_min_sum;
+                        min_sum_tab_tmp[low_matrix][high_matrix] = min(min_sum_tab_tmp[low_matrix][high_matrix],tmp_min_sum);
                     }
                 }
             }
@@ -82,14 +80,14 @@ class best_sequence
 
         size_t sum()
         {
-            size_t raw = matrix[0];
-            size_t colons = matrix[1];
+            size_t row = matrix[0];
+            size_t columns = matrix[1];
             size_t min_sum = 0;
             
             for (size_t i = 2; i < matrix.size(); ++i)
             {
-                min_sum = min_sum  + raw * colons * matrix[i];
-                colons = matrix[i];
+                min_sum += row * columns * matrix[i];
+                columns = matrix[i];
             }
 
             cout << "[DEBUG] SUM : " << min_sum << endl;

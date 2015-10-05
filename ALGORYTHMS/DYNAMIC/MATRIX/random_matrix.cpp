@@ -24,19 +24,19 @@ int main()
     size_t max_rows = 100;
     srand( (unsigned)time(NULL) );
     size_t rows_prev = nrand(max_rows) + 1;
-    size_t colons = 0;
-    size_t colons_prev = nrand(max_rows) + 1;
+    size_t columns = 0;
+    size_t columns_prev = nrand(max_rows) + 1;
 
     vector <size_t> matrix;
     matrix.push_back(rows_prev);
-    matrix.push_back(colons_prev);
+    matrix.push_back(columns_prev);
 
     for (size_t i = 0; i <= nrand(max_matrix); ++i)
     {
-        colons = nrand(max_rows) + 1;
-        rows_prev = colons_prev;
-        colons_prev = colons;
-        matrix.push_back(colons_prev);
+        columns = nrand(max_rows) + 1;
+        rows_prev = columns_prev;
+        columns_prev = columns;
+        matrix.push_back(columns_prev);
     }
 
     best_sequence matrix_test1(matrix);
