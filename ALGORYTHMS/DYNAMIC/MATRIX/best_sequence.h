@@ -31,8 +31,8 @@ class best_sequence
         {
             size_t row = matrix[0];
             size_t columns = matrix[1];
-//            vector <vector <size_t>> min_sum_tab_tmp(matrix.size(), vector<size_t>(matrix.size(),0));
-            vector <vector <size_t>> min_sum_tab_tmp(matrix.size(), vector<size_t>(matrix.size(),numeric_limits<size_t>::max()));
+//            vector <vector <size_t>> min_sum_tab_tmp(matrix.size(), vector<size_t>(matrix.size(),numeric_limits<size_t>::max()));
+            vector <vector <size_t>> min_sum_tab_tmp(matrix.size(), vector<size_t>(matrix.size(),0));
 
             for (size_t i = 2; i < matrix.size(); ++i)
             {
@@ -52,13 +52,14 @@ class best_sequence
                     size_t high_matrix = i;
                     for (size_t k = low_matrix; k < high_matrix; ++k)
                     {
-//                        cout << "[DEB] [" << low_matrix << "," << k << "] + [" << k + 1 << "," << high_matrix << "] + " << matrix[low_matrix - 1] << "*" << matrix[k] << "*" << matrix[high_matrix];
-//                        cout << " <-> " << min_sum_tab_tmp[low_matrix][k] << " + " << min_sum_tab_tmp[k + 1][high_matrix] << " + " << matrix[low_matrix - 1] * matrix[k] * matrix[high_matrix];
+//                        cout << "[DEB] [" << low_matrix << "," << k << "] + [" << k + 1 << "," << high_matrix << "] + " << matrix[low_matrix - 1] << "*" << matrix[k] << "*" << matrix[high_matrix] << endl;
+//                        cout << " <-> " << min_sum_tab_tmp[low_matrix][k] << " + " << min_sum_tab_tmp[k + 1][high_matrix] << " + " << matrix[low_matrix - 1] * matrix[k] * matrix[high_matrix] << endl;
 
                         size_t tmp_min_sum = min_sum_tab_tmp[low_matrix][k] + min_sum_tab_tmp[k + 1][high_matrix] + matrix[low_matrix - 1] * matrix[k] * matrix[high_matrix];
-//                        cout << " = " << tmp_min_sum << endl;
 
-                        min_sum_tab_tmp[low_matrix][high_matrix] = min(min_sum_tab_tmp[low_matrix][high_matrix],tmp_min_sum);
+//                        min_sum_tab_tmp[low_matrix][high_matrix] = min(min_sum_tab_tmp[low_matrix][high_matrix],tmp_min_sum);
+                        if ((min_sum_tab_tmp[low_matrix][high_matrix] > tmp_min_sum) or (!min_sum_tab_tmp[low_matrix][high_matrix]))
+                            min_sum_tab_tmp[low_matrix][high_matrix] = tmp_min_sum;
                     }
                 }
             }

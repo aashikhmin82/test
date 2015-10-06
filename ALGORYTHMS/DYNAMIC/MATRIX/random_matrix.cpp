@@ -9,11 +9,11 @@ using namespace std;
 
 size_t nrand(size_t n)
 {
-    const size_t bucket_size = RAND_MAX / n;
-    size_t r = 0;
+    random_device rd;
 
-    do r = rand() / bucket_size;
-    while(r >= n);
+    default_random_engine e1(rd());
+    uniform_int_distribution<int> uniform_dist(1, n);
+    size_t r = uniform_dist(e1);
 
     return r;
 }
@@ -47,7 +47,13 @@ int main()
     size_t min_sum = matrix_test1.print_min_sum_tab();
     if (sum < min_sum)
     {
-        cout << "[DEBUG] min_sum is not correct." << endl;
+        cout << "[ERROR] min_sum is not correct." << endl;
+
+        cout << "[ERROR] Matrix : ";
+        for (auto matrix_el : matrix)
+            cout << matrix_el << " ";
+        cout << endl;
+
         exit(1);
     }
 
@@ -57,7 +63,8 @@ int main()
     matrix_test2.min_sum();
     matrix_test2.print_matrix();
     matrix_test2.sum();
-    matrix_test2.print_min_sum_tab();
+    if (matrix_test2.print_min_sum_tab() != 15125)
+        cout << "[ERROR] Test Failed." << endl;
 
     return 0;
 }
