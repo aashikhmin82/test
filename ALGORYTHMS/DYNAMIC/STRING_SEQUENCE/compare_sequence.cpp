@@ -1,12 +1,6 @@
 #include <iostream>
-#include <cstdlib>
 #include <fstream>
 #include <sstream>
-#include <vector>
-#include <cmath>
-#include <map>
-#include <functional>
-#include <memory>
 
 #include "string_sequence.h"
 
@@ -14,19 +8,15 @@ using namespace std;
 
 int main(int argc, char* arg_vec[])
 {
-    if (argc == 1)
+    if (argc <= 2 )
     {
-        cout << "HELP: " << endl;
-        cout << "./programm file1 file2" << endl;
-        exit(0);
+        cerr << "HELP: " << endl;
+        cerr << "./programm file1 file2" << endl;
+        return 1;
     }
 
-    string file_name1, file_name2;
-    string str_el1, str_el2;
-    istringstream in1(arg_vec[1]);
-    in1 >> file_name1;
-    istringstream in2(arg_vec[2]);
-    in2 >> file_name2;
+    string file_name1 = arg_vec[1], file_name2 = arg_vec[2];
+    string str_el1 = "", str_el2 = "";
 
     cout << "[DEBUG] File name 1: " << file_name1 << endl;
     cout << "[DEBUG] File name 2: " << file_name2 << endl;
@@ -54,8 +44,8 @@ int main(int argc, char* arg_vec[])
     config_fl2.close();
 
     sequence_operations compare_string(str_el1, str_el2);
-    compare_string.compare_sequence();
-    compare_string.print_mutual_string();
+//    compare_string.longest_common_subsequence();
+    compare_string.return_common_subsequence();
 
     return 0;
 }

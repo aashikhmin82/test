@@ -1,12 +1,5 @@
 #include <iostream>
 #include <cstdlib>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <cmath>
-#include <map>
-#include <functional>
-#include <memory>
 
 #include "string_sequence.h"
 
@@ -18,8 +11,8 @@ int main(int argc, char* arg_vec[])
     string str_el1 = "ABCBDAB", str_el2 = "BDCABA";
 
     sequence_operations compare_string(str_el1, str_el2);
-    compare_string.compare_sequence();
-    string result_string = compare_string.print_mutual_string();
+//    compare_string.longest_common_subsequence();
+    string result_string = compare_string.return_common_subsequence();
 
     if (result_string == "BCBA")
     {
@@ -35,8 +28,8 @@ int main(int argc, char* arg_vec[])
     str_el1 = "THISISAUTOTEST"; str_el2 = "THISISAUTOTEST";
 
     sequence_operations compare_string1(str_el1, str_el2);
-    compare_string1.compare_sequence();
-    string result_string1 = compare_string1.print_mutual_string();
+ //   compare_string1.longest_common_subsequence();
+    string result_string1 = compare_string1.return_common_subsequence();
 
     if (result_string1 == "THISISAUTOTEST")
     {
@@ -52,8 +45,8 @@ int main(int argc, char* arg_vec[])
     str_el1 = "THISISAUTOTEST"; str_el2 = "AAAAAAATAAAHAIAAASAIAAASAAAAAAAUAATAIAAAAAAAAOAAAAATAAAEAAAAASATA";
 
     sequence_operations compare_string2(str_el1, str_el2);
-    compare_string2.compare_sequence();
-    string result_string2 = compare_string2.print_mutual_string();
+//    compare_string2.longest_common_subsequence();
+    string result_string2 = compare_string2.return_common_subsequence();
 
     if (result_string2 == "THISISAUTOTEST")
     {
