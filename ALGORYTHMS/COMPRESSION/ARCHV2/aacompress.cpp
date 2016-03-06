@@ -9,6 +9,7 @@
 
 #include "huffman_tree16.h"
 #include "compress_algorithm.h"
+#include "huffman_treeSG.h"
 
 using namespace std;
 
@@ -85,8 +86,15 @@ int main(int argc, char* arg_vec[])
 
 
     huffman_tree huffman_codec(probability_symbol16);
-    huffman_codec.create_archive_string(vec_rle);
-    huffman_codec.save_compressed_string(compressed_filename);
+//    huffman_codec.create_archive_string(vec_rle);
+//    huffman_codec.save_compressed_string(compressed_filename);
+
+    //COMPRESS1
+    string compressed_string = compress(vec_rle);
+//    cout << "AAAAA : " << compressed_string << endl;
+    ofstream out(compressed_filename);
+    out << compressed_string;
+    out.close();
 
     return 0;
 }

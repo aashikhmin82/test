@@ -24,4 +24,6 @@ class huffman_tree_uncompress
         vector <uint16_t> read_compressed_string();
 };
 
+//string decompress2(string const & packed);
+
 #endif //HUFFMAN_H_

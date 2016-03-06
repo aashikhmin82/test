@@ -8,6 +8,7 @@
 
 #include "huffman_tree_uncompress.h"
 #include "compress_algorithm.h"
+#include "huffman_treeSG.h"
 
 using namespace std;
 
@@ -25,8 +26,25 @@ int main(int argc, char* arg_vec[])
     string uncompressed_file = arg_vec[2];
     string str_el1 = "";
 
-    huffman_tree_uncompress huffman_uncompress(compressed_filename);
-    vector <uint16_t> huffman_result_string = huffman_uncompress.read_compressed_string();
+    //// SG Begin
+    ifstream sgfile;
+    sgfile.open(compressed_filename);
+
+    stringstream str_stream;
+    str_stream << sgfile.rdbuf();
+    string sg_string = str_stream.str();
+
+//    cout << "SG file : " << sg_string << endl;
+
+//    string decompressed_string = decompress2(sg_string);
+    vector <uint16_t> huffman_result_string = decompress(sg_string);
+//    cout << "SG string : " << endl;
+//    cout << decompressed_string;
+//    return 0;
+    /// End
+
+ //   huffman_tree_uncompress huffman_uncompress(compressed_filename);
+ //   vector <uint16_t> huffman_result_string = huffman_uncompress.read_compressed_string();
   
     cout << "============================== Uncopress RLE ===================" << endl;
     vector <uint16_t> uncompressed_rle_vec = rle_uncompress16(huffman_result_string);

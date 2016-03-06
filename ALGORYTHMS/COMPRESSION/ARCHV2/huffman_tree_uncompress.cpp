@@ -167,3 +167,23 @@ vector <uint16_t> huffman_tree_uncompress::read_compressed_string()
 
     return decompressed_string16;
 }
+
+    /*
+string decompress2(string const & packed)
+{
+    cout << "Decompress function ...." << endl;
+    cout << packed << endl;
+    string result = "test";
+    bits_t unpacked = unpack_bits(packed);
+    size_t position = 0;
+    decode_t unpacked_code = unpack_code(unpacked, position);
+    unpacked = unpacked.substr(position);
+    string result = letter2char(decode(unpacked, unpacked_code));
+
+    if (print)
+        unpacked_code.dump(cerr, result);
+
+    return result;
+}
+
+        */
