@@ -11,16 +11,16 @@ class rsa_key
 {
     public:
     vector <size_t> create_key();
-    vector <size_t> count_key(size_t p, size_t q);
-    size_t encrypt(size_t value, size_t e, size_t n);
-    size_t decrypt(size_t value, size_t d, size_t n);
+    vector <size_t> count_key(const size_t p, const size_t q);
+    size_t encrypt(const size_t value, const size_t e, const size_t n);
+    size_t decrypt(const size_t value, const size_t d, const size_t n);
 
     private:
-    bool is_prime(size_t check_num);
-    size_t random_prime(size_t min_value, size_t max_value);
-    size_t gcd(size_t a, size_t b);
-    bool mutial_prime(size_t number1, size_t number2);
-    size_t count_d(size_t fi, size_t e);
+    bool is_prime(const size_t check_num);
+    size_t random_prime(const size_t min_value, const size_t max_value);
+    size_t gcd(const size_t a, const size_t b);
+    bool mutial_prime(const size_t number1, const size_t number2);
+    size_t count_d(const size_t fi, const size_t e);
 };
 
 #endif /* RSA_KEY_H_ */

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void test(vector <size_t> open_key, vector <size_t> private_key)
+void test(const vector <size_t> open_key, const vector <size_t> private_key)
 {
     ifstream open_key_output(".rsaa/open_key_file"); 
     ifstream private_key_output(".rsaa/private_key_file");
@@ -43,7 +43,7 @@ void test(vector <size_t> open_key, vector <size_t> private_key)
     }
 }
 
-vector <uint8_t> convert_to_utf8(string str_el)
+vector <uint8_t> convert_to_utf8(const string str_el)
 {
     vector <uint8_t> vec_to_encrypt;
 

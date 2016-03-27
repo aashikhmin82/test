@@ -12,7 +12,7 @@
 using namespace std;
 using namespace NTL;
 
-bool rsa_key::is_prime(size_t check_num)
+bool rsa_key::is_prime(const size_t check_num)
 {
     if(check_num <= 1)
         return false;
@@ -28,7 +28,7 @@ bool rsa_key::is_prime(size_t check_num)
     return true;
 }
 
-size_t rsa_key::random_prime(size_t min_value, size_t max_value)
+size_t rsa_key::random_prime(const size_t min_value, const size_t max_value)
 {
     default_random_engine generator((std::random_device())());
     uniform_int_distribution<size_t> distribution(min_value,max_value);
@@ -57,7 +57,7 @@ size_t rsa_key::gcd(size_t a, size_t b)
     return a + b;
 }
 
-bool rsa_key::mutial_prime(size_t number1, size_t number2)
+bool rsa_key::mutial_prime(const size_t number1, const size_t number2)
 {
     if (gcd(number1, number2) == 1)
         return true;
@@ -65,7 +65,7 @@ bool rsa_key::mutial_prime(size_t number1, size_t number2)
     return false;
 }
 
-size_t rsa_key::count_d(size_t fi, size_t e)
+size_t rsa_key::count_d(const size_t fi, const size_t e)
 {
     size_t d = 2;
     while (d < fi)
@@ -78,7 +78,7 @@ size_t rsa_key::count_d(size_t fi, size_t e)
     return 1;
 }
 
-vector <size_t> rsa_key::count_key(size_t p, size_t q)
+vector <size_t> rsa_key::count_key(const size_t p, const size_t q)
 {
     size_t n, fi, e;
     size_t d = 1;
@@ -111,7 +111,7 @@ vector <size_t> rsa_key::create_key()
     return (keys);
 }
 
-size_t rsa_key::encrypt(size_t value, size_t e, size_t n)
+size_t rsa_key::encrypt(const size_t value, const size_t e, const size_t n)
 {
     ZZ big_value, big_e, big_n, zz_encrypted_value, sum_value, aa_long_big;
     big_value = value;
@@ -124,7 +124,7 @@ size_t rsa_key::encrypt(size_t value, size_t e, size_t n)
     return encrypted_value;
 }
 
-size_t rsa_key::decrypt(size_t value, size_t d, size_t n)
+size_t rsa_key::decrypt(const size_t value, const size_t d, const size_t n)
 {
     ZZ big_value, big_d, big_n, zz_decrypted_value;
     big_value = value; big_d = d; big_n = n;

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-vector <uint8_t> convert_to_utf8(string str_el)
+vector <uint8_t> convert_to_utf8(const string str_el)
 {
     vector <uint8_t> vec_to_encrypt;
 
@@ -48,7 +48,7 @@ int main(int argc, char* arg_vec[])
     }
     cout << endl;
 
-    string test_string = "NEW rsa encrypted test string";
+    string test_string = "NEWv1 rsa encrypted test string";
     cout << "String to encrypt : " << test_string << endl;
 
     vector <uint8_t> vec_to_encrypt = convert_to_utf8(test_string);
