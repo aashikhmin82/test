@@ -50,7 +50,9 @@ class class_graph_debug
                 cout << "[D]<print_debug_graph> " << graph_objects_list[i.first]->value() << " (" << graph_objects_list[i.first]->colour() << ") : ";
                 for (const auto& j : i.second)
                 {
+                    cout << "<J: " << j << "> " << endl;
                     cout << graph_objects_list[j]->value() << " (" << graph_objects_list[j]->colour() << "), ";
+                    cout << "nx ";
                 }
                 cout << endl;
             }

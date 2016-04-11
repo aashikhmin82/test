@@ -18,7 +18,7 @@
 using namespace std;
 namespace po = boost::program_options;
 
-bool process_command_line(int argc, char ** argv, bool& print_debug_flag, string& filename)
+bool process_command_line(int argc, char ** argv, bool& print_debug_flag, string& filename, string& to_point)
 {
     try
     {
@@ -27,6 +27,7 @@ bool process_command_line(int argc, char ** argv, bool& print_debug_flag, string
         desc.add_options()
             ("help,h", "Show help")
             ("file,f", po::value<string>(&filename), "Filename with the graph. Format:\n  Element : el1 el2 el3")
+            ("to_point,to", po::value<string>(&to_point), "Select destination point")
             ("debug,d", "Enable debug")
             ;
 
@@ -100,10 +101,11 @@ map<string, vector<string>> create_graph_map(class_graph_debug print_debug, stri
 
 int main(int argc, char ** argv)
 {
-    bool print_debug_flag = false;
     string filename = "graph_list1.txt";
+    string to_point = "6";
+    bool print_debug_flag = false;
 
-    if (!process_command_line(argc, argv, print_debug_flag, filename))
+    if (!process_command_line(argc, argv, print_debug_flag, filename, to_point))
         return false;
 
     class_graph_debug print_debug(print_debug_flag);
@@ -145,6 +147,7 @@ int main(int argc, char ** argv)
 
                 objects_queue.push(j);
                 graph_objects_list[j]->colour() = "black";
+                graph_objects_list[j]->priv() = graph_objects_list[queue_element];
                 graph_objects_list[j]->steps_count() = count;
                 cout << "[DEL] " << graph_objects_list[queue_element] << endl;
                 graph_objects_list[j]->priv() = graph_objects_list[queue_element];
@@ -153,4 +156,12 @@ int main(int argc, char ** argv)
     }
 
     print_debug.print_debug_result(graph_map, graph_objects_list);
+    cout << "\n\nWay from " << to_point << " to 1 : " << endl;
+    cout << graph_objects_list[to_point]->value() << endl;
+    class_graph_element* priv_element = graph_objects_list[to_point]->priv();
+    while (priv_element)
+    {
+        cout << priv_element->value() << endl;
+        priv_element = priv_element->priv();
+    }
 }
