@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstddef>
 #include <string>
 #include <memory>
@@ -12,7 +14,10 @@ class class_graph_element
         string element_colour;
         size_t element_count;
         
-        class_graph_element *next_element = NULL;
+//        class_graph_element *next_element = NULL;
+//        class_graph_element *priv_element = NULL;
+        class_graph_element *next_element = nullptr;
+        class_graph_element *priv_element = nullptr;
 
     public:
         class_graph_element(string graph_element_value) : element_value(graph_element_value)
@@ -52,13 +57,23 @@ class class_graph_element
             return element_colour;
         }
 
-        class_graph_element& next()
+        class_graph_element*& next()
         {
-            return *next_element;
+            return next_element;
         }
 
-        const class_graph_element next() const
+        const class_graph_element* next() const
         {
-            return *next_element;
+            return next_element;
+        }
+
+        class_graph_element*& priv()
+        {
+            return priv_element;
+        }
+
+        const class_graph_element* priv() const
+        {
+            return priv_element;
         }
 };
