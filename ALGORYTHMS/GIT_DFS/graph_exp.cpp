@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <unordered_map>
 #include <sstream>
 #include <vector>
 #include <cassert>
@@ -14,6 +15,8 @@
 
 #include "graph_element.h"
 #include "graph_help.h"
+#include "graph_map.h"
+#include "topological_sort.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -66,39 +69,6 @@ bool process_command_line(int argc, char ** argv, bool& print_debug_flag, string
     return true;
 }
 
-map<string, vector<string>> create_graph_map(class_graph_debug print_debug, const string filename)
-{
-    ifstream graph_list_file(filename);
-    string graph_string;
-    map<string, vector<string>> graph_map;
-
-    while (getline(graph_list_file, graph_string))
-    {
-        print_debug << "[DG] String : " << graph_string << "\n";
-
-        stringstream graph_string_desc(graph_string);
-        string graph_word;
-        string graph_first_word;
-        vector<string> graph_string_vec;
-        graph_string_desc >> graph_first_word;
-
-        print_debug << "[DG] " << graph_first_word << " : ";
-
-        graph_string_desc >> graph_word; //delete : from string
-        while (graph_string_desc >> graph_word)
-        {
-            graph_string_vec.push_back(graph_word);
-            print_debug << graph_word << " ";
-        }
-        print_debug << "\n";
-
-        graph_map.insert(pair<string, vector<string>>(graph_first_word,graph_string_vec));
-    }
-    print_debug << "\n";
-
-    return graph_map;
-}
-
 size_t dfs_func(const string obj_priv_value, const string obj_value, size_t discover_value, const map<string, shared_ptr<class_graph_element>>& graph_objects_list, const map<string, vector<string>>& graph_map)
 {
     graph_objects_list.find(obj_value)->second->colour() = "grey";
@@ -128,8 +98,10 @@ int main(int argc, char ** argv)
         return false;
 
     class_graph_debug print_debug(print_debug_flag);
+    Graph graph(filename, print_debug);
 
-    map<string, vector<string>> graph_map = create_graph_map(print_debug, filename);
+    auto graph_map = graph.graph_map_value();
+
     map<string, shared_ptr<class_graph_element>> graph_objects_list;
 
     for (const auto& i : graph_map)
@@ -139,18 +111,21 @@ int main(int argc, char ** argv)
         cout << i.first << " : ";//"s : " << i.second << "\n";
     }
 
+//DEBUG output
     for (const auto& i : graph_objects_list)
-    {
         cout << "[Obj] " << i.first << " : " << i.second->value() << "  (" << graph_objects_list[i.first]->value() << ")" << endl;
-    }
-
     print_debug.print_debug_graph(graph_map, graph_objects_list);
+    print_debug << "Top Elements : ";
+    auto top_elements = graph.top_elements_value();
+    for (const auto& top_element : graph.top_elements_value())
+        print_debug << top_element << " ";
+    print_debug << "\n";
+/////////
 
     size_t discover_value = 0;
     string fake_value_before_first = "0";
-    string first_value = "1";
-    dfs_func(fake_value_before_first, first_value, discover_value, graph_objects_list, graph_map);
+    string first_value = top_elements[0];
+    vector<string> topological_sorted_vec = topoligical_sort(graph, print_debug); 
     
     print_debug << "After DFS : \n";
-    print_debug.print_debug_graph(graph_map, graph_objects_list);
 }
