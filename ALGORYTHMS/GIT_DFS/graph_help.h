@@ -42,7 +42,7 @@ class class_graph_debug
         return *this;
     }
 
-    const void print_debug_graph(map<string, vector<string> >& graph_map, map<string, shared_ptr<class_graph_element>>& graph_objects_list)
+    const void print_debug_graph(unordered_map<string, vector<string> >& graph_map, unordered_map<string, shared_ptr<class_graph_element>>& graph_objects_list)
     {
         if (debug_flag)
         {
@@ -62,7 +62,7 @@ class class_graph_debug
         }
     }
 
-    const void print_debug_result(map<string, vector<string> >& graph_map, map<string, class_graph_element*>& graph_objects_list)
+    const void print_debug_result(unordered_map<string, vector<string> >& graph_map, unordered_map<string, class_graph_element*>& graph_objects_list)
     {
         if (debug_flag)
         {

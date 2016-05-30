@@ -34,18 +34,18 @@ void topological_sort_recursion(vector<string>& sorted_vec, const Graph& graph, 
     }
 }
 
-vector<string> topoligical_sort(const Graph& graph, class_graph_debug& print_debug)
+vector<string> topoligical_sort(const Graph& graph, class_graph_debug& debug)
 {
     vector<string> sorted_vec;
-    for (const string top_element : graph.top_elements_value())
+    for (const auto& top_element : graph.top_elements_value())
         topological_sort_recursion(sorted_vec, graph, top_element);
 
-    print_debug << "Topologically sorted vector : ";
+    debug << "Topologically sorted vector : ";
     for (const auto& debug_element : sorted_vec)
     {
-        print_debug << debug_element << " ";
+        debug << debug_element << " ";
     }
-    print_debug << "\n";
+    debug << "\n";
 
     return sorted_vec;
 }

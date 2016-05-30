@@ -21,7 +21,7 @@
 using namespace std;
 namespace po = boost::program_options;
 
-bool process_command_line(int argc, char ** argv, bool& print_debug_flag, string& filename, string& to_point)
+bool process_command_line(int argc, char ** argv, bool& debug_flag, string& filename, string& to_point)
 {
     try
     {
@@ -47,7 +47,7 @@ bool process_command_line(int argc, char ** argv, bool& print_debug_flag, string
         if (vm.count("debug"))
         {
             cout << "-d found: DEBUG is ON" << endl;
-            print_debug_flag = true;
+            debug_flag = true;
         }
 
         if (vm.count("file"))
@@ -69,7 +69,7 @@ bool process_command_line(int argc, char ** argv, bool& print_debug_flag, string
     return true;
 }
 
-size_t dfs_func(const string obj_priv_value, const string obj_value, size_t discover_value, const map<string, shared_ptr<class_graph_element>>& graph_objects_list, const map<string, vector<string>>& graph_map)
+size_t dfs_func(const string obj_priv_value, const string obj_value, size_t discover_value, const unordered_map<string, shared_ptr<class_graph_element>>& graph_objects_list, const unordered_map<string, vector<string>>& graph_map)
 {
     graph_objects_list.find(obj_value)->second->colour() = "grey";
     if (obj_priv_value == "0")
@@ -92,40 +92,35 @@ int main(int argc, char ** argv)
 {
     string filename = "graph_list1.txt";
     string to_point = "6";
-    bool print_debug_flag = false;
+    bool debug_flag = false;
 
-    if (!process_command_line(argc, argv, print_debug_flag, filename, to_point))
+    if (!process_command_line(argc, argv, debug_flag, filename, to_point))
         return false;
 
-    class_graph_debug print_debug(print_debug_flag);
-    Graph graph(filename, print_debug);
+    class_graph_debug debug(debug_flag);
+    Graph graph(filename, debug);
 
     auto graph_map = graph.graph_map_value();
 
-    map<string, shared_ptr<class_graph_element>> graph_objects_list;
+    unordered_map<string, shared_ptr<class_graph_element>> graph_objects_list;
 
     for (const auto& i : graph_map)
     {
         class_graph_element graph_object_element(i.first);
-        graph_objects_list.insert(pair<string, shared_ptr<class_graph_element>>(i.first, make_shared<class_graph_element> (class_graph_element(i.first))));
+        graph_objects_list.insert(make_pair(i.first, make_shared<class_graph_element> (class_graph_element(i.first))));
         cout << i.first << " : ";//"s : " << i.second << "\n";
     }
 
 //DEBUG output
     for (const auto& i : graph_objects_list)
         cout << "[Obj] " << i.first << " : " << i.second->value() << "  (" << graph_objects_list[i.first]->value() << ")" << endl;
-    print_debug.print_debug_graph(graph_map, graph_objects_list);
-    print_debug << "Top Elements : ";
+    debug.print_debug_graph(graph_map, graph_objects_list);
+    debug << "Top Elements : ";
     auto top_elements = graph.top_elements_value();
     for (const auto& top_element : graph.top_elements_value())
-        print_debug << top_element << " ";
-    print_debug << "\n";
-/////////
+        debug << top_element << " ";
+    debug << "\n";
+////////
 
-    size_t discover_value = 0;
-    string fake_value_before_first = "0";
-    string first_value = top_elements[0];
-    vector<string> topological_sorted_vec = topoligical_sort(graph, print_debug); 
-    
-    print_debug << "After DFS : \n";
+    vector<string> topological_sorted_vec = topoligical_sort(graph, debug); 
 }
