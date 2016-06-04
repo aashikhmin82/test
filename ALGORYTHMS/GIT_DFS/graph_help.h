@@ -31,9 +31,6 @@ class class_graph_debug
                         cout << "[Debug1] " << text << " : " << value << endl;
     }
 
-//    template <typename Type> void operator<<(string text)
-//    void operator<<(string text)
-//    class_graph_debug  operator<<(string text)
     template <typename T> class_graph_debug  operator<<(T& text)
     {
         if (debug_flag)

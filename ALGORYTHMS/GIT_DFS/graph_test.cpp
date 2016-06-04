@@ -23,7 +23,7 @@ using namespace std;
 int main(int argc, char ** argv)
 {
     string filename = "TEST/graph_list4.txt";
-    vector<string> test1_result = { "5", "6", "7", "3", "2", "4", "1" };
+    vector<string> test1_result = { "6", "7", "3", "2", "4", "1", "5" };
     bool debug_flag = false;
 
     class_graph_debug debug{debug_flag};

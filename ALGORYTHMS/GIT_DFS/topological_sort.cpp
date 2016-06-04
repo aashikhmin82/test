@@ -17,36 +17,36 @@
 
 using namespace std;
 
-void topological_sort_recursion(vector<string>& sorted_vec, const Graph& graph, const string& graph_key)
+void topological_sort_recursion(vector<string>& topologically_sorted, const Graph& graph, const string& graph_vertex)
 {
-    if (find(sorted_vec.begin(), sorted_vec.end(), graph_key) == sorted_vec.end())
+    if (find(topologically_sorted.begin(), topologically_sorted.end(), graph_vertex) == topologically_sorted.end())
     {
         auto graph_map = graph.graph_map_value();
-        for (const auto& graph_element : graph_map.find(graph_key)->second)
+        for (const auto& graph_element : graph_map.find(graph_vertex)->second)
         {
-            if (not(graph_element == graph_key))
+            if (not(graph_element == graph_vertex))
             {
-                sorted_vec.erase(remove(sorted_vec.begin(), sorted_vec.end(), graph_key), sorted_vec.end());
-                topological_sort_recursion(sorted_vec, graph, graph_element);
+                topologically_sorted.erase(remove(topologically_sorted.begin(), topologically_sorted.end(), graph_vertex), topologically_sorted.end());
+                topological_sort_recursion(topologically_sorted, graph, graph_element);
             }
         }
-        sorted_vec.emplace_back(graph_key);
+        topologically_sorted.emplace_back(graph_vertex);
     }
 }
 
 vector<string> topoligical_sort(const Graph& graph, class_graph_debug& debug)
 {
-    vector<string> sorted_vec;
+    vector<string> topologically_sorted;
     for (const auto& top_element : graph.top_elements_value())
-        topological_sort_recursion(sorted_vec, graph, top_element);
+        topological_sort_recursion(topologically_sorted, graph, top_element);
 
     debug << "Topologically sorted vector : ";
-    for (const auto& debug_element : sorted_vec)
+    for (const auto& debug_element : topologically_sorted)
     {
         debug << debug_element << " ";
     }
     debug << "\n";
 
-    return sorted_vec;
+    return topologically_sorted;
 }
 

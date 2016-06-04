@@ -4,6 +4,8 @@
 #include <fstream>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
+#include <set>
 #include <sstream>
 #include <vector>
 #include <cassert>
@@ -53,13 +55,15 @@ class Graph {
             debug << "\n";
             //Select top elements
             //Select all keys
+            set<string> all_vertex;
             for (const auto& key_element : graph_map)
             {
                 debug << "[D] Key map value : " << key_element.first << "\n";
-                top_elements.push_back(key_element.first);
+                all_vertex.insert(key_element.first);
             }
 
             //Remove all, that are not first
+            set<string> non_first_vertex;
             for (const auto& key_element : graph_map)
             {
                 debug << "[Di1] Key map value : " << key_element.first << "\n";
@@ -68,11 +72,13 @@ class Graph {
                     if (other_element != key_element.first)
                     {
                         debug << "\t\t" << other_element;
-                        top_elements.erase(remove(top_elements.begin(), top_elements.end(), other_element), top_elements.end());
+                        non_first_vertex.insert(other_element);
                     }
                 }
                 debug << "\n";
             }
+
+            set_difference(all_vertex.begin(), all_vertex.end(), non_first_vertex.begin(), non_first_vertex.end(), inserter(top_elements, top_elements.end()));
         }
         catch(...)
         {
