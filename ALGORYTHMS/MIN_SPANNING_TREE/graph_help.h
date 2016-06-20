@@ -15,7 +15,7 @@ class graph_debug
         bool debug_flag;
 
     public:
-        graph_debug(bool print_debug_flag) : debug_flag(print_debug_flag)
+        explicit graph_debug(bool print_debug_flag) : debug_flag(print_debug_flag)
     {
         if (print_debug_flag)
             cout << "DEBUG ON" << endl;

@@ -10,13 +10,13 @@ min_stp.o: min_stp.cpp graph_help.h graph_map.h
 
 kruskal_alg.o: kruskal_alg.h kruskal_alg.cpp graph_help.h graph_map.h
 
-test: graph_test
-	./graph_test
+test: test_stp
+	./test_stp
 
-graph_test: graph_test.o topological_sort.o
+test_stp: test_stp.o kruskal_alg.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-graph_test.o: graph_test.cpp graph_element.h graph_help.h graph_map.h
+test_stp.o: test_stp.cpp graph_help.h graph_map.h
 
 clean:
 	rm -f min_stp *.o
