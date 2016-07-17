@@ -16,4 +16,4 @@
 
 using namespace std;
 
-vector<vertex_t> kruskal_arg(const Graph& graph, graph_debug& debug);
+vector<vertex_t> prims_alg(const Graph& graph, graph_debug& debug);
