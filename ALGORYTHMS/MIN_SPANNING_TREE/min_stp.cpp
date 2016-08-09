@@ -1,17 +1,16 @@
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <unordered_map>
-#include <sstream>
-#include <vector>
+#include "boost/program_options.hpp"
+#include <algorithm> 
 #include <cassert>
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <math.h>
-#include <string>
-#include <algorithm> 
-#include <sys/stat.h>
 #include <queue>
-#include "boost/program_options.hpp"
+#include <sstream>
+#include <string>
+#include <sys/stat.h>
+#include <unordered_map>
+#include <vector>
 
 #include "graph_help.h"
 #include "graph_map.h"
@@ -79,13 +78,12 @@ int main(int argc, char ** argv)
     Graph graph(filename, debug);
 
     auto min_stp_kruskal = kruskal_arg(graph, debug);
-    auto min_stp_prims = prims_alg(graph, debug);
-
     cout << "STP (Kruskal's algorithm) : ";
     for (const auto& stp_i : min_stp_kruskal)
         cout << stp_i << " ";
     cout << endl;
 
+    auto min_stp_prims = prims_alg(graph, debug);
     cout << "STP (Prim's algorithm) : ";
     for (const auto& stp_i : min_stp_prims)
         cout << stp_i << " ";

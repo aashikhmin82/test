@@ -15,7 +15,7 @@ prims_alg.o: prims_alg.h prims_alg.cpp graph_help.h graph_map.h
 test: test_stp
 	./test_stp
 
-test_stp: test_stp.o kruskal_alg.o
+test_stp: test_stp.o kruskal_alg.o prims_alg.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 test_stp.o: test_stp.cpp graph_help.h graph_map.h

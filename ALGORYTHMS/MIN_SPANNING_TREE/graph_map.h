@@ -1,20 +1,19 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
-#include <set>
-#include <sstream>
-#include <vector>
+#include <algorithm>
 #include <cassert>
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <math.h>
-#include <string>
-#include <algorithm>
-#include <sys/stat.h>
 #include <queue>
+#include <set>
+#include <sstream>
+#include <string>
+#include <sys/stat.h>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "graph_help.h"
 
@@ -44,7 +43,7 @@ class Graph {
     public:
         Graph (vector<vector<string>> input_graph, graph_debug& debug)
         {
-            for (auto& input_string : input_graph)
+            for (const auto& input_string : input_graph)
             {
                 debug << "STRING : ";
                 unordered_map<vertex_t, weight_t> edges_of_vertex;
