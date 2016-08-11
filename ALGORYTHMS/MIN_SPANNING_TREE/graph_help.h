@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class graph_debug
 {
     private:
@@ -17,13 +15,13 @@ class graph_debug
     public:
     explicit graph_debug(bool print_debug_flag) : debug_flag(print_debug_flag)
     {
-        debug_flag ? cout << "DEBUG ON" << endl : cout << "DEBUG OFF" << endl;
+        debug_flag ? std::cout << "DEBUG ON" << std::endl : std::cout << "DEBUG OFF" << std::endl;
     }
 
     template <typename T> graph_debug&  operator<<(T& text)
     {
         if (debug_flag)
-            cout << text;
+            std::cout << text;
 
         return *this;
     }

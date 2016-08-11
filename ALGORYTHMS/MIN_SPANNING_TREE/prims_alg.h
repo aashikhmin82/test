@@ -13,6 +13,4 @@
 #include <unordered_map>
 #include <vector>
 
-using namespace std;
-
-vector<vertex_t> prims_alg(const Graph& graph, graph_debug& debug);
+std::vector<vertex_t> prims_alg(const Graph& graph, graph_debug& debug);

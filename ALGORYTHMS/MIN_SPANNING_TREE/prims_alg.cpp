@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <math.h>
 #include <queue>
 #include <sstream>
 #include <string>
@@ -33,7 +33,7 @@ void add_weighted_edge(edge_map& weighted_edge, const vertex_t& from_node, const
 };
 
 template<typename graph_map, typename graph_debug>
-vector<vertex_t> prims_select_min_stp(graph_map&& vertex_map, graph_debug& debug)
+vector<vertex_t> prims_select_min_stp(const graph_map& vertex_map, graph_debug& debug)
 {
     vector<vertex_t> min_stp;
     vertex_t min_edge, vertex_to_add;
@@ -83,5 +83,5 @@ vector<vertex_t> prims_alg(const Graph& graph, graph_debug& debug)
 
     debug << "Vertex : ";
 
-    return (prims_select_min_stp(move(graph_map), debug));
+    return (prims_select_min_stp(graph_map, debug));
 }

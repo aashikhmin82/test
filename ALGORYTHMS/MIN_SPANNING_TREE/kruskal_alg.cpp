@@ -36,7 +36,7 @@ void check_safe_edges(const vertex_t& vertex, edge_weight_map& safe_edges, vecto
 
 void add_to_safe_edges(const vertex_t& vertex1, const vertex_t& vertex2, edge_weight_map& safe_edges)
 {
-    size_t add_to_index { 0 };
+    weight_t add_to_index { 0 };
     size_t matched_count { 0 };
     if (safe_edges.empty())
     {

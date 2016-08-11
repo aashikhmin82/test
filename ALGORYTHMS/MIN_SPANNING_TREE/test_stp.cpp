@@ -32,7 +32,8 @@ int main(int argc, char ** argv)
         { "h", "a(8)", "g(1)", "i(7)" },
         { "i", "c(2)", "g(6)", "h(7)" } 
     };
-    const vector<vertex_t> test_kruskal_result1 { "h", "g", "f", "g", "f", "c", "i", "c", "d", "c", "h", "a", "b", "a", "e", "d" };
+//    const vector<vertex_t> test_kruskal_result1 { "h", "g", "f", "g", "f", "c", "i", "c", "d", "c", "h", "a", "b", "a", "e", "d" };
+    const vector<vertex_t> test_kruskal_result1 { "h", "g", "f", "g", "f", "c", "i", "c", "d", "c", "a", "h", "a", "b", "e", "d" };
     const vector<vertex_t> test_prims_result1 { "i", "c", "c", "f", "f", "g", "g", "h", "c", "d", "c", "b", "b", "a", "d", "e" };
 
     int exit_code = 0;

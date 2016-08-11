@@ -1,5 +1,5 @@
 #include "boost/program_options.hpp"
-#include <algorithm> 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iostream>

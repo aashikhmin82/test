@@ -21,4 +21,4 @@ test_stp: test_stp.o kruskal_alg.o prims_alg.o
 test_stp.o: test_stp.cpp graph_help.h graph_map.h
 
 clean:
-	rm -f min_stp *.o
+	rm -f min_stp test_stp *.o
