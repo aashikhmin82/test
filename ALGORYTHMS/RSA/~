@@ -1,11 +1,11 @@
 #include "boost/program_options.hpp"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include <cassert>
 #include <fstream>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <sys/stat.h>
-#include <vector>
 
 #include "rsa_key.h"
 #include "debug.h"
@@ -55,7 +55,7 @@ bool test(const keys_list_t& open_key, const keys_list_t& private_key, debug_t& 
         open_keys.push_back(key);
         debug << "Open Key : " << key << "\n";
     }
-    debug << "\n";
+    cout << endl;
 
     vector <size_t> private_keys;
     while (private_key_output >> key)
@@ -63,13 +63,13 @@ bool test(const keys_list_t& open_key, const keys_list_t& private_key, debug_t& 
         private_keys.push_back(key);
         debug << "Private Key : " << key << "\n";
     }
-    debug << "\n";
+    cout << endl;
 
     vector <size_t> test_input = {65, 43, 22, 62, 89, 2, 43, 55};
     for (auto test_letter : test_input)
     {
         rsa_key rsa;
-        debug << "I : " << test_letter << "\n";
+        cout << "I : " << test_letter << endl;
         size_t encrypted_value = rsa.encrypt(test_letter, open_key[0], open_key[1]);
         size_t decrypted_value = rsa.decrypt(encrypted_value, private_key[0], private_key[1]);
         if (decrypted_value != test_letter)
@@ -77,6 +77,19 @@ bool test(const keys_list_t& open_key, const keys_list_t& private_key, debug_t& 
     }
 
     return true;
+}
+
+vector <uint8_t> convert_to_utf8(const string str_el)
+{
+    vector <uint8_t> vec_to_encrypt;
+
+    for (size_t i = 0; i < str_el.size(); ++i)
+    {
+        uint8_t sym8 = str_el[i];
+        vec_to_encrypt.push_back(sym8);
+    }
+
+    return vec_to_encrypt;
 }
 
 template<typename keys_list_t, typename debug_t>
@@ -133,7 +146,7 @@ int main(int argc, char** argv)
     vector <size_t> private_key;
     create_keys(open_key, private_key, debug);
 
-    mkdir(".rsaa",0700);
+    mkdir(".rsaa",0777);
     ofstream open_key_file, private_key_file;
     open_key_file.open(".rsaa/open_key_file");
     private_key_file.open(".rsaa/private_key_file");
@@ -143,5 +156,5 @@ int main(int argc, char** argv)
     open_key_file.close(); private_key_file.close();
 
     cout << "Test (check encryption - decryption) : ";
-    test(open_key, private_key, debug) ? cout << "Test Passed\n" : cout << "Test Failed\n";
+    test(open_key, private_key, debug) ? cout << "Passed\n" : cout << "Failed\n";
 }
