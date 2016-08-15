@@ -10,6 +10,7 @@
 #include "rsa_key.h"
 #include "debug.h"
 
+using namespace rsakey;
 using namespace std;
 namespace po = boost::program_options;
 

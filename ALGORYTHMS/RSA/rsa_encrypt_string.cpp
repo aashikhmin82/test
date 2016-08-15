@@ -9,6 +9,7 @@
 #include "rsa_key.h"
 
 using namespace std;
+using namespace rsakey;
 
 vector <uint8_t> convert_to_utf8(const string str_el)
 {

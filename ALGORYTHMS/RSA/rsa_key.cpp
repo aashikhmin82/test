@@ -11,8 +11,9 @@
 
 using namespace std;
 using namespace NTL;
+using namespace rsakey;
 
-bool rsa_key::is_prime(const size_t check_num)
+bool is_prime(const size_t check_num)
 {
     if(check_num <= 1)
         return false;
@@ -28,7 +29,7 @@ bool rsa_key::is_prime(const size_t check_num)
     return true;
 }
 
-size_t rsa_key::random_prime(const size_t min_value, const size_t max_value)
+size_t random_prime(const size_t min_value, const size_t max_value)
 {
     default_random_engine generator((std::random_device())());
     uniform_int_distribution<size_t> distribution(min_value,max_value);
@@ -46,7 +47,7 @@ size_t rsa_key::random_prime(const size_t min_value, const size_t max_value)
     return random_prime_number;
 }
 
-size_t rsa_key::gcd(size_t a, size_t b)
+size_t gcd(size_t a, size_t b)
 {
     while(a > 0 && b > 0)
         if(a > b)
@@ -57,7 +58,7 @@ size_t rsa_key::gcd(size_t a, size_t b)
     return a + b;
 }
 
-bool rsa_key::mutial_prime(const size_t number1, const size_t number2)
+bool mutial_prime(const size_t number1, const size_t number2)
 {
     if (gcd(number1, number2) == 1)
         return true;
@@ -65,7 +66,7 @@ bool rsa_key::mutial_prime(const size_t number1, const size_t number2)
     return false;
 }
 
-size_t rsa_key::count_d(const size_t fi, const size_t e)
+size_t count_d(const size_t fi, const size_t e)
 {
     size_t d = 2;
     while (d < fi)
