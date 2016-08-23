@@ -1,9 +1,11 @@
 #include "boost/program_options.hpp"
+#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <random>
 #include <set>
 #include <vector>
+#include <memory>
 
 #include "debug.h"
 #include "primes.h"
@@ -28,7 +30,7 @@ bool process_command_line(int argc, char ** argv, bool& debug_flag)
 
     if (vm.count("help"))
     {
-        std::cout << desc << "\n";
+        cout << desc << "\n";
         return false;
     }
 
@@ -41,27 +43,33 @@ bool process_command_line(int argc, char ** argv, bool& debug_flag)
     return true;
 }
 
-void create_number_list(const number_t range_from, const number_t range_to, vector <number_t>& test_number_list)
+decltype(auto) create_number_list(const number_t& range_from, const number_t& range_to, const number_t& vec_size)
 {
-    default_random_engine generator((std::random_device())());
+    default_random_engine generator((random_device())());
     uniform_int_distribution<number_t> random_size(range_from, range_to);
 
-    for (auto& test_number : test_number_list)
+    auto test_number_list = make_unique< vector<number_t> >(vec_size);
+
+    for (auto& test_number : *test_number_list)
     {
         auto rand_num = random_size(generator);
         test_number = rand_num;
     }
+
+    return test_number_list;
 }
 
 template <typename check_num_t>
 bool is_prime(const check_num_t& check_num)
 {
-    if(check_num <= 1)
+    if(check_num < 1)
         return false;
+    else if (check_num <= 3)
+        return true;
 
-    size_t root = sqrt((double)check_num);
+    check_num_t root = sqrt(static_cast<double>(check_num));
 
-    size_t x { 2 };
+    check_num_t x { 2 };
     if (check_num % x == 0)
         return false;
 
@@ -92,18 +100,19 @@ decltype(auto) prime_search1(const list_t& test_number_list, debug_t& debug)
             return test_number;
         }
     }
+
     return return_value;
 }
 
-template <typename list_t, typename max_num_t, typename debug_t>
-decltype(auto) prime_search2(const list_t& test_number_list, max_num_t& max_num, debug_t& debug)
+template <typename list_t, typename num_t, typename debug_t>
+decltype(auto) prime_search2(const list_t& test_number_list, const num_t& max_num, debug_t& debug)
 {
     debug << "Prime Search2 func\n";
-    prime_numbers <max_num_t> primes(max_num);
+    prime_numbers <num_t> primes(max_num);
     auto primes_list = primes.get_primes_list();
 
     debug << "PrimesSearch2 [Primes List] : ";
-    decltype(max_num) found_prime { max_num };
+    num_t found_prime { 0 };
     for (const auto& check_number : test_number_list)
     {
         if (primes_list.find(check_number) != primes_list.end())
@@ -125,27 +134,31 @@ int main(int argc, char** argv)
     {
         process_command_line(argc, argv, debug_flag);
     }
-    catch(std::exception& e)
+    catch(exception& e)
     {
-        std::cerr << "Error : " << e.what() << "\n";
+        cerr << "Error : " << e.what() << "\n";
         return false;
     }
     catch(...)
     {
-        std::cerr << "Unknown error!" << "\n";
+        cerr << "Unknown error!" << "\n";
         return false;
     }
 
     print_debug debug(debug_flag);
 
-    vector <number_t> test_number_list(150);
     number_t min_num { 1 };
 //    number_t max_num { 99999999 };
     number_t max_num { 999999 };
-    create_number_list(min_num, max_num, test_number_list);
+    number_t vec_size { 150 };
 
-    auto prime_func1 = prime_search1(test_number_list, debug);
-    cout << "First Prime: " << prime_func1 << endl;
+    auto test_number_list = create_number_list(min_num, max_num, vec_size);
 
-    prime_search2(test_number_list, max_num, debug);
+    auto prime_func1 = prime_search1(*test_number_list, debug);
+    cout << "Prime (func1): " << prime_func1 << endl;
+
+    auto prime_func2 = prime_search2(*test_number_list, max_num, debug);
+    cout << "Prime (func2): " << prime_func2 << endl;
+
+    assert(prime_func2 == prime_func1);
 }

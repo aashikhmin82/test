@@ -7,7 +7,7 @@ template <typename number_t>
 class prime_numbers
 {
     private:
-        std::set <size_t> primes_list;
+        std::set <number_t> primes_list { 1, 2 };
 
     public:
         explicit prime_numbers(const number_t& max_number)
@@ -19,12 +19,9 @@ class prime_numbers
             }
 
             number_t max_check_num = std::sqrt((double)max_number); 
-            std::cout << "[Prime Num Class ] Max_Check_Num : " << max_check_num << "\n";
             number_t cur_numb { 0 };
-            std::cout << "[Prime Num Class ] Curr Number : ";
             while (cur_numb < max_check_num)
             {
-                std::cout << cur_numb << " ";
                 cur_numb = *primes_list_tmp.begin();
                 primes_list.insert(*primes_list_tmp.begin());
                 primes_list_tmp.erase(primes_list_tmp.begin()); 
@@ -40,7 +37,7 @@ class prime_numbers
             }
     }
 
-    std::set <size_t>& get_primes_list()
+    std::set <number_t>& get_primes_list()
     {
         return primes_list;
     }
