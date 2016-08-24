@@ -6,7 +6,7 @@ all: expand_number
 expand_number: expand_number.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-expand_number.o: expand_number.cpp debug.h primes.h
+expand_number.o: expand_number.cpp debug.h primes.h primes_v2.h
 
 clean:
 	rm -f expand_number *.o

@@ -37,7 +37,7 @@ class prime_numbers
             }
     }
 
-    std::set <number_t>& get_primes_list()
+    decltype(primes_list)& get_primes_list()
     {
         return primes_list;
     }

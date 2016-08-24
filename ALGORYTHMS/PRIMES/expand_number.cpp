@@ -9,8 +9,10 @@
 
 #include "debug.h"
 #include "primes.h"
+#include "primes_v2.h"
 
 using number_t = size_t;
+
 using namespace std;
 
 namespace po = boost::program_options;
@@ -126,6 +128,43 @@ decltype(auto) prime_search2(const list_t& test_number_list, const num_t& max_nu
     return found_prime;
 }
 
+template <typename list_t, typename num_t, typename debug_t>
+decltype(auto) prime_search3(const list_t& test_number_list, const num_t& max_num, debug_t& debug)
+{
+    debug << "Prime Search3 func\n";
+    prime_numbers_v2 <num_t> primes(max_num);
+    auto primes_list = primes.get_primes_list();
+
+    debug << "PrimesSearch3 [Primes List] : ";
+    num_t found_prime { 0 };
+    for (const auto& check_number : test_number_list)
+    {
+        if (primes_list[check_number])
+        {
+            debug << "Found : " << check_number << "\n";
+            found_prime = check_number;
+            break;
+        }
+    }
+
+    return found_prime;
+}
+
+template <typename function_t>
+decltype(auto) check_duration(function_t&& function, string description = "No informaion")
+{
+    cout << "Function - " << description << endl;
+
+    auto start_time = chrono::system_clock::now();
+    auto function_result = function;
+    auto end_time = chrono::system_clock::now();
+
+    auto duration = end_time - start_time;
+    cout << duration.count() << " ms" << endl;
+
+    return function_result;
+}
+
 int main(int argc, char** argv)
 {
     bool debug_flag {false};
@@ -154,11 +193,15 @@ int main(int argc, char** argv)
 
     auto test_number_list = create_number_list(min_num, max_num, vec_size);
 
-    auto prime_func1 = prime_search1(*test_number_list, debug);
+    auto prime_func1 = check_duration(prime_search1(*test_number_list, debug), "Function 1");
     cout << "Prime (func1): " << prime_func1 << endl;
 
-    auto prime_func2 = prime_search2(*test_number_list, max_num, debug);
+    auto prime_func2 = check_duration(prime_search2(*test_number_list, max_num, debug), "Function 2");
     cout << "Prime (func2): " << prime_func2 << endl;
 
+    auto prime_func3 = check_duration(prime_search3(*test_number_list, max_num, debug), "Function 3");
+    cout << "Prime (func3): " << prime_func3 << endl;
+
     assert(prime_func2 == prime_func1);
+    assert(prime_func3 == prime_func1);
 }
