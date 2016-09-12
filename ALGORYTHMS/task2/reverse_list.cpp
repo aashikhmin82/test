@@ -104,14 +104,16 @@ bool check_reversed(const obj_t& init_first, const obj_t& reversed_first)
     vector<number_t> init_list = dump_to_vector(init_first);
     vector<number_t> reversed_init_list = dump_to_vector(reversed_first);
 
+    if (init_list.size() != reversed_init_list.size())
+        return false;
+
     size_t i { init_list.size() };
     for (const auto& init_el : init_list)
     {
         --i;
         if (init_el != reversed_init_list[i])
         {
-            throw logic_error("Elements must to be equal");
-//            return false;
+            return false;
         }
     }
 
