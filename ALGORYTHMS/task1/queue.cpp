@@ -4,6 +4,7 @@
 #include <random>
 
 #include "stack.h"
+#include "myqueue.h"
 
 using namespace std;
 
@@ -48,42 +49,39 @@ int main()
     number_t vec_size { 15 };
 
     auto number_list = create_number_list(min_num, max_num, vec_size);
-    stack <number_t> stack_in;
-    stack <number_t> stack_out;
 
-    stack <pair<number_t, number_t>> stack_in1;
-    stack <pair<number_t, number_t>> stack_out1;
-
-    stack <int> stack_in3;
-    stack <int> stack_out3;
+    myqueue <number_t> queue1;
+    myqueue <pair<number_t, number_t>> queue2;
+    myqueue <int> queue3;
 
     size_t total_push_count { 0 };
     size_t total_pull_count { 0 };
     number_t min_value { numeric_limits<number_t>::max() };
-    number_t push_min_value_v3 { 0 };
-    number_t pull_min_value_v3 { 0 };
-    while (total_push_count < vec_size - 1 and total_pull_count < vec_size - 1)
+    int push_min_value_v3 { 0 };
+    int pull_min_value_v3 { 0 };
+    while (total_push_count < vec_size - 1 or total_pull_count < vec_size - 1)
     {
         auto push_rand_num = get_rnd_limited(1, 20, total_push_count, vec_size);
         for (decltype(push_rand_num) i = 0; i < push_rand_num; ++i)
         {
             // First variation
-            stack_in.push_back(number_list[total_push_count]);
+            queue1.push_back(number_list[total_push_count]);
 
             // Second variation
             min_value = min(min_value, number_list[total_push_count]);
-            stack_in1.push_back(make_pair(number_list[total_push_count], min_value));
+//            stack_in1.push_back(make_pair(number_list[total_push_count], min_value));
+            queue2.push_back(make_pair(number_list[total_push_count], min_value));
 
             // Third variation
             if (total_push_count == 0)
             {
                 push_min_value_v3 = number_list[0];
-                stack_in3.push_back(number_list[0]);
+                queue3.push_back(number_list[0]);
             }
             else
             {
                 int dnum = number_list[total_push_count] - push_min_value_v3;
-                stack_in3.push_back(dnum);
+                queue3.push_back(dnum);
 
                 if (dnum < 0)
                     push_min_value_v3 = number_list[total_push_count];
@@ -100,37 +98,25 @@ int main()
         for (decltype(pull_rand_num) i = 0; i < pull_rand_num; ++i)
         {
             // First variation
-            if (stack_out.empty())
-                while (!stack_in.empty())
-                    stack_out.push_back(stack_in.pop_back());
-
-            cout_str1 += to_string(stack_out.pop_back()) + " ";
+            cout_str1 += to_string(queue1.pop_front()) + " ";;
 
             // Second variation
-            if (stack_out1.empty())
-                while (!stack_in1.empty())
-                    stack_out1.push_back(stack_in1.pop_back());
-
-            auto element_stack_out1 = stack_out1.pop_back();
-            cout_str2 += to_string(element_stack_out1.first) + " (" + to_string(element_stack_out1.second) + ") ";
+            auto queue2_out = queue2.pop_front();
+            cout_str2 += to_string(queue2_out.first) + " (" + to_string(queue2_out.second) + ") ";
 
             // Third variation
-            if (stack_out3.empty())
-                while (!stack_in3.empty())
-                    stack_out3.push_back(stack_in3.pop_back());
-
             if (total_pull_count == 0)
             {
-                pull_min_value_v3 = stack_out3.pop_back();
-                cout_str3 += to_string(pull_min_value_v3) + " (" + to_string(pull_min_value_v3) + ") ";
+                pull_min_value_v3 = queue3.pop_front();
+                cout_str3 += to_string(pull_min_value_v3) + " [" + to_string(pull_min_value_v3) + "] ";
             }
             else
             {
-                auto element_stack_out3 = stack_out3.pop_back();
-                cout_str3 += to_string(element_stack_out3 + push_min_value_v3) + " ["
-                            + to_string(push_min_value_v3) + "] ";
+                int element_stack_out3 = queue3.pop_front();
+                cout_str3 += to_string(element_stack_out3 + pull_min_value_v3) + " ["
+                            + to_string(pull_min_value_v3) + "] ";
                 if (element_stack_out3 < 0)
-                     pull_min_value_v3 = element_stack_out3 + push_min_value_v3;
+                     pull_min_value_v3 = element_stack_out3 + pull_min_value_v3;
             }
 
             ++total_pull_count;

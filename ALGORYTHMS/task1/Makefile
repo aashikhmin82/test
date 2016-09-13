@@ -6,7 +6,7 @@ all: queue
 queue: queue.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-queue.o: queue.cpp stack.h
+queue.o: queue.cpp stack.h myqueue.h
 
 clean:
 	rm -f queue *.o
