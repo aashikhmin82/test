@@ -26,4 +26,12 @@ class myqueue
 
             return stack_out.pop_back();
         }
+
+        bool empty()
+        {
+            if (stack_in.empty() and stack_out.empty())
+                return true;
+
+            return false;
+        }
 };
