@@ -4,7 +4,6 @@
 #include <queue>
 #include <random>
 
-#include "stack.h"
 #include "myqueue.h"
 
 using namespace std;
@@ -223,7 +222,7 @@ int main()
         for (decltype(pull_rand_num) i = 0; i < pull_rand_num; ++i)
         {
             // First variation
-            cout_str1 += to_string(queue1.pop_front()) + " ";;
+            cout_str1 += to_string(queue1.pop_front()) + " ";
 
             // Second variation
             auto queue2_out = queue2.pop_front();

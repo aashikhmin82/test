@@ -4,7 +4,7 @@
 #include <iostream>
 
 template <typename data_t>
-class stack
+class mystack
 {
     private:
     std::vector <data_t> stack_data;

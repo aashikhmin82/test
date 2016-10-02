@@ -9,8 +9,7 @@ template <typename data_t>
 class myqueue
 {
     private:
-        stack <data_t> stack_in;
-        stack <data_t> stack_out;
+        mystack <data_t> stack_in, stack_out;
 
     public:
         void push_back(const data_t& data_string)
