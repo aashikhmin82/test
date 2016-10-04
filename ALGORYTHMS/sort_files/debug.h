@@ -10,7 +10,7 @@ class print_debug
     public:
     explicit print_debug(const bool print_debug_flag) : debug_flag(print_debug_flag)
     {
-        debug_flag ? std::cout << "DEBUG ON" << std::endl : std::cout << "DEBUG OFF" << std::endl;
+        std::cout << (debug_flag ? "DEBUG ON" : "DEBUG OFF") << std::endl;
     }
 
     template <typename T> print_debug& operator<<(T& text)

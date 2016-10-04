@@ -1,4 +1,5 @@
 CXXFLAGS = -std=c++14 -Wall -ggdb
+LDFLAGS = -lboost_program_options
 
 all: sort_files
 

@@ -16,8 +16,8 @@ class myhash
     using hash_t = std::vector <std::vector<data_t>>;
 
     private:
-        hash_t hashed_list;
-        size_t m { 0 }, p { 4294967291 }, a { 0 }, b { 0 };
+        hash_t hashed_data_vec;
+        size_t m, p { 4294967291 }, a, b;
 
         size_t hash_function(const size_t& k)
         {
@@ -39,26 +39,26 @@ class myhash
             return result_val;
         }
 
-        hash_t create_hash (const std::vector<data_t>& input_list)
+        hash_t create_hash (const std::vector<data_t>& input_data_vec)
         {
-            std::cout << "Inupt list size: " << input_list.size() << "  M : " << m << std::endl;
+            std::cout << "Input data_vec size: " << input_data_vec.size() << "  M : " << m << std::endl;
             std::cout << "P : " << p << "  A: " << a << "  B: " << b << std::endl;
 
-            hash_t hashlist(m);
+            hash_t hashdata_vec(m);
 
-            for (const auto input_el : input_list)
+            for (const auto input_el : input_data_vec)
             {
                 size_t hash_i = hash_function(str_to_size(input_el.first));
-                hashlist[hash_i].push_back(input_el);
+                hashdata_vec[hash_i].push_back(input_el);
             }
 
-            return hashlist;
+            return hashdata_vec;
         }
 
     public:
-        myhash(const std::vector<data_t>& input_list)
+        myhash(const std::vector<data_t>& input_data_vec)
         {
-            m = get_nearest_prime(input_list.size());
+            m = get_nearest_prime(input_data_vec.size());
 
             std::default_random_engine generator((std::random_device())());
             std::uniform_int_distribution <size_t> Za(1, p - 1);
@@ -67,13 +67,13 @@ class myhash
             std::uniform_int_distribution<size_t> Zb(0, p - 1);
             b = Zb(generator);
 
-            hashed_list = create_hash(input_list);
+            hashed_data_vec = create_hash(input_data_vec);
         }
 
         void dump_hash()
         {
             size_t i { 0 };
-            for (const auto& hash_el : hashed_list)
+            for (const auto& hash_el : hashed_data_vec)
             {
                 std::cout << i << " : ";
 
@@ -101,14 +101,14 @@ class myhash
         std::vector<std::pair<std::string, size_t>> dump_file_stat (const std::string& search_string)
         {
             size_t hash_i = hash_function(str_to_size(search_string));
-            if (hashed_list[hash_i].empty())
+            if (hashed_data_vec[hash_i].empty())
             {
                 std::cerr << "Not found" << std::endl;
             }
             else
             {
                 bool found { false };
-                for (const auto& hashed_pair : hashed_list[hash_i])
+                for (const auto& hashed_pair : hashed_data_vec[hash_i])
                 {
                     if (hashed_pair.first == search_string)
                     {
@@ -132,7 +132,7 @@ class myhash
         {
             size_t size { 0 };
 
-            for (const auto& hash_el : hashed_list)
+            for (const auto& hash_el : hashed_data_vec)
                 if (!hash_el.empty())
                     size += hash_el.size();
 
