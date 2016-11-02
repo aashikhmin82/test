@@ -40,11 +40,11 @@ bool process_command_line(int argc, char ** argv, bool& debug_enable, string& se
         }
     }
     catch(std::exception& e) {
-        std::cerr << "Error: " << e.what() << "\n";
+        cerr << "Error: " << e.what() << "\n";
         return false;
     }
     catch(...) {
-        std::cerr << "Unknown error!" << "\n";
+        cerr << "Unknown error!" << "\n";
         return false;
     }
 
@@ -66,8 +66,8 @@ int main(int argc, char ** argv)
     cout << (fsm_check_match(test_string, search_string) ? "[fsm_check_match] Found!" :
                                                            "[fsm_check_match] Not found!") << endl;
 
-    cout << (compare_check_match(test_string, search_string) ? "[compare_check_match] Found!" :
-                                                               "[compare_check_match] Not found!") << endl;
+    cout << (match_with_quadratic_complexity(test_string, search_string) ? "[match_with_quadratic_complexity] Found!" :
+                                                               "[match_with_quadratic_complexity] Not found!") << endl;
 
     cout << (regex_check_match(test_string, search_string) ? "[regex_check_match] Found!" :
                                                              "[regex_check_match] Not found!") << endl;

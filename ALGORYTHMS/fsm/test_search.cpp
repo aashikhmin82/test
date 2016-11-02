@@ -38,7 +38,7 @@ bool compare_methods (const string& test_string, const string& search_string,
         fms_test = false;
     }
 
-    if (!compare_check_match(test_string, search_string))
+    if (!match_with_quadratic_complexity(test_string, search_string))
         compare_test = false;
 
     if (!regex_check_match(test_string, search_string))
@@ -54,7 +54,7 @@ bool compare_methods (const string& test_string, const string& search_string,
 
     if (check_state) {
         if (expected_result != fms_test) {
-            cerr << "Expected result : " << expected_result << " \tActual result : " << fms_test << endl;
+            cerr << "Expected result : " << expected_result << " \tActual result : " << fms_test << "\n";
             return false;
         }
     }
@@ -82,22 +82,16 @@ bool test1() {
 }
 
 bool test2() {
-    string test_string { "" }; string search_string { "" };
-    if (!compare_methods(test_string, search_string)) {
-        cerr << "test2.1 failed" << endl;
-        return false;
-    }
+    const vector<vector<string>> test_data { {"", ""}, {"", "aaa"}, {"aaa", ""} };
+    size_t i { 1 };
 
-    test_string = ""; search_string = "aaa";
-    if (!compare_methods(test_string, search_string)) {
-        cerr << "test2.2 failed" << endl;
-        return false;
-    }
+    for (const auto& data : test_data) {
+        if (!compare_methods(data[0], data[1])) {
+            cerr << "test2." << i << " failed\n";
+            return false;
+        }
 
-    test_string = "aaa"; search_string = "";
-    if (!compare_methods(test_string, search_string)) {
-        cerr << "test2.3 failed" << endl;
-        return false;
+        ++i;
     }
 
     return true;
@@ -106,13 +100,13 @@ bool test2() {
 bool test3() {
     string test_string { "kdfeifsdsababcdkfeeio"}; string search_string { "ababc" };
     if (!compare_methods(test_string, search_string, true, true)) {
-        cerr << "test3.1 failed" << endl;
+        cerr << "test3.1 failed\n";
         return false;
     }
 
     test_string = "kdfeifsdsfdsdfsfcdkfeeio"; search_string = "ababc";
     if (!compare_methods(test_string, search_string, true, false)) {
-        cerr << "test3.1 failed" << endl;
+        cerr << "test3.1 failed\n";
         return false;
     }
 
@@ -120,10 +114,8 @@ bool test3() {
 }
 
 int main() {
+    vector <pair<string, decltype(test1())>> tests { {"test1()", test1()}, {"test2()", test2()}, {"test3()", test3()} };
 
-    cout << "Test1 : " << (test1() ? "Passed" : "Failed" ) << endl;
-
-    cout << "Test2 : " << (test2() ? "Passed" : "Failed" ) << endl;
-
-    cout << "Test3 : " << (test3() ? "Passed" : "Failed" ) << endl;
+    for (const auto& test : tests)
+        cout << test.first << " : " << (test.second ? "Passed" : "Failed" ) << endl;
 }

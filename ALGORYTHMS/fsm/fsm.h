@@ -11,52 +11,45 @@ using namespace std;
 class fsm {
 
     private:
-    vector<vector<size_t>> fsm_matrix;
+    vector<size_t> fsm_matrix;
 
-    size_t check_substring_match(const unordered_set<string>& search_substrings, string substring, char unmatched_char) {
-        substring.pop_back();
-        substring += unmatched_char;
-        while (substring.size() > 0) {
-                substring.erase(substring.begin());
+    size_t search_longest_needle_substring(const unordered_set<string>& needle_prefixes, string needle_substring) {
+        while (needle_substring.size() > 0) {
+            needle_substring.erase(needle_substring.begin());
 
-            if (search_substrings.find(substring) != search_substrings.end())
-                return substring.size();
+            if (needle_prefixes.find(needle_substring) != needle_prefixes.end())
+                return needle_substring.size();
         }
 
         return 0;
     }
 
     public:
-    explicit fsm(const string& search_string) : fsm_matrix(search_string.size(), vector<size_t>(127,0)) {
-        unordered_set<string> search_substrings;
+    explicit fsm(const string& search_string) : fsm_matrix(search_string.size() * 127, 0) {
+        unordered_set<string> needle_prefixes;
 
-        string substring { "" };
-        size_t i { 0 }, match_count { 1 };
+        size_t match_count { 1 };
 
-        for (const auto& ch : search_string) {
-            string prev_substring = substring;
-            substring += ch;
-            search_substrings.insert(substring);
+        for (size_t i = 0; i < search_string.size(); ++i) {
+            needle_prefixes.insert(search_string.substr(0,i));
 
-            size_t ch_number = static_cast<size_t>(ch);
-            fsm_matrix[i][ch_number] = match_count;
+            fsm_matrix[127 * i + static_cast<size_t>(search_string[i])] = match_count;
 
             if (i > 0) {
-                for (const char& prev_substr_ch : prev_substring) {
-                    if (prev_substr_ch != ch) {
-                        size_t match_count = check_substring_match(search_substrings, substring, prev_substr_ch);
-                        size_t prev_ch_number = static_cast<size_t>(prev_substr_ch);
-                        fsm_matrix[i][prev_ch_number] = match_count;
+                for (size_t j = 0; j < i; ++j) {
+                    if (search_string[j] != search_string[i]) {
+                        string needle_substring = search_string.substr(1,i) + search_string[j];
+                        size_t match_count = search_longest_needle_substring(needle_prefixes, needle_substring);
+                        fsm_matrix[127 * i + static_cast<size_t>(search_string[j])] = match_count;
                     }
                 }
             }
 
-            ++i;
             ++match_count;
         }
     }
 
-    const vector<vector<size_t>> get() const {
+    const vector<size_t> get() const {
         return fsm_matrix;
     }
 };

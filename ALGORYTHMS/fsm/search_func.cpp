@@ -17,27 +17,28 @@ bool fsm_check_match(const string& test_string, const string& search_string) {
     fsm fsm_search { search_string };
     auto fsm_matrix = fsm_search.get();
 
-    size_t match_count { 0 };
+    size_t matched_letters_count { 0 };
 
     for (const char& test_ch : test_string) {
-        if (test_ch != search_string[match_count]) {
-            if(match_count)
-                        match_count = fsm_matrix[match_count][static_cast<size_t>(test_ch)];
+        if (test_ch != search_string[matched_letters_count]) {
+            if(matched_letters_count) {
+                matched_letters_count = fsm_matrix[matched_letters_count * 127 + static_cast<size_t>(test_ch)];
+            }
         } else {
-            ++match_count;
+            ++matched_letters_count;
 
-            if (match_count == search_str_len)
+            if (matched_letters_count == search_str_len)
                 return true;
         }
     }
 
-    if (match_count == search_str_len)
+    if (matched_letters_count == search_str_len)
         return true;
     else
         return false;
 }
 
-bool compare_check_match(const string& test_string, const string& search_string) {
+bool match_with_quadratic_complexity(const string& test_string, const string& search_string) {
     if (test_string.size() < search_string.size())
         return false;
 
@@ -51,8 +52,9 @@ bool compare_check_match(const string& test_string, const string& search_string)
             ++j;
         }
 
-        if (j == search_string.size())
+        if (j == search_string.size()) {
             return true;
+        }
     }
 
     return false;
