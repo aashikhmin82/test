@@ -1,28 +1,30 @@
 #include <regex>
-#include <unordered_map>
+#include <map>
+#include <chrono>
+#include <thread>
 
 #include "fsm.h"
 
 using namespace std;
 
-bool fsm_check_match(const string& test_string, const string& search_string) {
+bool fsm_check_match(const string& heystack, const string& needle) {
 
-    if (search_string == "" )
+    if (needle == "" )
         return true;
 
-    const size_t search_str_len = search_string.size();
-    if (search_str_len > test_string.size())
+    const size_t search_str_len = needle.size();
+    if (search_str_len > heystack.size())
         return false;
 
-    fsm fsm_search { search_string };
+    fsm fsm_search { needle };
     auto fsm_matrix = fsm_search.get();
 
     size_t matched_letters_count { 0 };
 
-    for (const char& test_ch : test_string) {
-        if (test_ch != search_string[matched_letters_count]) {
+    for (const char& heystack_char : heystack) {
+        if (heystack_char != needle[matched_letters_count]) {
             if(matched_letters_count) {
-                matched_letters_count = fsm_matrix[matched_letters_count * 127 + static_cast<size_t>(test_ch)];
+                matched_letters_count = fsm_matrix[matched_letters_count * 127 + static_cast<size_t>(heystack_char)];
             }
         } else {
             ++matched_letters_count;
@@ -38,21 +40,21 @@ bool fsm_check_match(const string& test_string, const string& search_string) {
         return false;
 }
 
-bool match_with_quadratic_complexity(const string& test_string, const string& search_string) {
-    if (test_string.size() < search_string.size())
+bool match_with_quadratic_complexity(const string& heystack, const string& needle) {
+    if (heystack.size() < needle.size())
         return false;
 
-    for (size_t i = 0; i <= test_string.size() - search_string.size(); ++i) {
+    for (size_t i = 0; i <= heystack.size() - needle.size(); ++i) {
 
         size_t j = 0;
-        while (j < search_string.size()) {
-            if (search_string[j] != test_string[i+j])
+        while (j < needle.size()) {
+            if (needle[j] != heystack[i+j])
                 break;
 
             ++j;
         }
 
-        if (j == search_string.size()) {
+        if (j == needle.size()) {
             return true;
         }
     }
@@ -60,14 +62,51 @@ bool match_with_quadratic_complexity(const string& test_string, const string& se
     return false;
 }
 
-bool regex_check_match(const string& test_string, const string& search_string) {
-    if (test_string.size() < search_string.size())
+bool regex_check_match(const string& heystack, const string& needle) {
+    if (heystack.size() < needle.size())
         return false;
 
-    string regex_string = ".*" + search_string + ".*";
+    string regex_string = ".*" + needle + ".*";
     regex search_regex { regex_string };
-    if (regex_match(test_string, search_regex))
+    if (regex_match(heystack, search_regex))
         return true;
 
     return false;
+}
+
+bool boyer_moore_match(const string& heystack, const string& needle) {
+
+    if (needle == "" )
+        return true;
+
+    map <char, size_t> needle_letters;
+    for (size_t i = 0; i < needle.size() - 1; ++i)
+        needle_letters[needle[i]] = needle.size() - (i + 1);
+
+    if (heystack.size() < needle.size())
+        return false;
+
+    size_t k { needle.size() - 1 }, j { 0 };
+    while (k < heystack.size() and j != needle.size()) {
+        if (heystack[k - j] == needle[needle.size() - j - 1]) {
+            ++j;
+        } else {
+            if (needle_letters.find(heystack[k - j]) != needle_letters.end()) {
+                if (needle_letters[heystack[k - j]] < j) {
+                    k += needle.size() - j;
+                } else {
+                    k += needle_letters[heystack[k - j]] - j;
+                }
+            } else {
+                k += needle.size() - j;
+            }
+
+            j = 0;
+        }
+    }
+
+    if (j == needle.size())
+        return true;
+    else
+        return false;
 }

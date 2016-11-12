@@ -39,10 +39,15 @@ void compare_methods (const string& haystack, const string& needle, times_t& tim
     start_time = time::now();
     match_with_quadratic_complexity(haystack, needle);
     end_time = time::now();
-    size_t compare_time = chrono::duration_cast<mks>(end_time - start_time).count();
+    size_t quadratic_algorithm_time = chrono::duration_cast<mks>(end_time - start_time).count();
 
-    vector<size_t> times { fsm_time, compare_time };
-    times_map.push_back( {haystack.size(), { fsm_time, compare_time }} );
+    start_time = time::now();
+    boyer_moore_match(haystack, needle);
+    end_time = time::now();
+    size_t boyer_moore_time = chrono::duration_cast<mks>(end_time - start_time).count();
+
+    vector<size_t> times { fsm_time, quadratic_algorithm_time };
+    times_map.push_back( {haystack.size(), { fsm_time, quadratic_algorithm_time, boyer_moore_time }} );
 }
 
 times_t check_time() {

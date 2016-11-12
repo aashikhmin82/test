@@ -26,29 +26,32 @@ string random_string(size_t max_size)
     return s;
 }
 
-bool compare_methods (const string& test_string, const string& search_string,
+bool compare_methods (const string& needle, const string& heystack,
         const bool check_state = false, const bool expected_result = true) {
 
-    bool fms_test { true }, compare_test { true }, regex_test { true };
-    if (search_string.size() <= test_string.size()) {
-        if (!fsm_check_match(test_string, search_string))
+    bool fms_test { true }, compare_test { true }, regex_test { true }, boyer_moore_test { true };
+    if (heystack.size() <= needle.size()) {
+        if (!fsm_check_match(needle, heystack))
             fms_test = false;
 
     } else {
         fms_test = false;
     }
 
-    if (!match_with_quadratic_complexity(test_string, search_string))
+    if (!match_with_quadratic_complexity(needle, heystack))
         compare_test = false;
 
-    if (!regex_check_match(test_string, search_string))
+    if (!regex_check_match(needle, heystack))
         regex_test = false;
 
-    if (fms_test != compare_test or fms_test != regex_test) {
+    if (!boyer_moore_match(needle, heystack))
+        boyer_moore_test = false;
+
+    if (fms_test != compare_test or fms_test != regex_test or fms_test != boyer_moore_test) {
         cout << "Test : Failed" << endl;
         cout << "[Error] Test failed. fms : " << fms_test << "\tcompare : " << compare_test << "\tregex : " << regex_test << endl;
-        cout << "[Error] Test String : " << test_string << endl;
-        cout << "[Error] Search String : " << search_string << endl;
+        cout << "[Error] Test String : " << needle << endl;
+        cout << "[Error] Search String : " << heystack << endl;
         return false;
     }
 
@@ -70,11 +73,11 @@ bool test1() {
         uniform_int_distribution<size_t> random_max_size2(1, 20);
         size_t max_size2 { random_max_size2(re) };
 
-        string random_test_string { random_string(max_size1) };
+        string random_needle { random_string(max_size1) };
 
-        string random_search_string { random_string(max_size2) };
+        string random_heystack { random_string(max_size2) };
 
-        if (!compare_methods(random_test_string, random_search_string))
+        if (!compare_methods(random_needle, random_heystack))
             return false;
     }
 
@@ -86,6 +89,7 @@ bool test2() {
     size_t i { 1 };
 
     for (const auto& data : test_data) {
+        cout << "Test2 : " << i << "\n";
         if (!compare_methods(data[0], data[1])) {
             cerr << "test2." << i << " failed\n";
             return false;
@@ -98,14 +102,14 @@ bool test2() {
 }
 
 bool test3() {
-    string test_string { "kdfeifsdsababcdkfeeio"}; string search_string { "ababc" };
-    if (!compare_methods(test_string, search_string, true, true)) {
+    string needle { "kdfeifsdsababcdkfeeio"}; string heystack { "ababc" };
+    if (!compare_methods(needle, heystack, true, true)) {
         cerr << "test3.1 failed\n";
         return false;
     }
 
-    test_string = "kdfeifsdsfdsdfsfcdkfeeio"; search_string = "ababc";
-    if (!compare_methods(test_string, search_string, true, false)) {
+    needle = "kdfeifsdsfdsdfsfcdkfeeio"; heystack = "ababc";
+    if (!compare_methods(needle, heystack, true, false)) {
         cerr << "test3.1 failed\n";
         return false;
     }
