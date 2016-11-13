@@ -19,12 +19,12 @@ bool fsm_check_match(const string& heystack, const string& needle) {
     fsm fsm_search { needle };
     auto fsm_matrix = fsm_search.get();
 
-    size_t matched_letters_count { 0 };
+    size_t matched_letters_count { 0 }, uniq_symbols_amount { 256 };
 
     for (const char& heystack_char : heystack) {
         if (heystack_char != needle[matched_letters_count]) {
             if(matched_letters_count) {
-                matched_letters_count = fsm_matrix[matched_letters_count * 127 + static_cast<size_t>(heystack_char)];
+                matched_letters_count = fsm_matrix[matched_letters_count * uniq_symbols_amount + static_cast<size_t>(static_cast<unsigned char>(heystack_char))];
             }
         } else {
             ++matched_letters_count;

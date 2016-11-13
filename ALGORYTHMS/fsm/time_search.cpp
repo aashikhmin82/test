@@ -76,13 +76,21 @@ int main() {
     for (const auto& times_el : times) {
         cout << times_el.first;
 
-        int fsm_time { 0 }, compare_time { 0 };
-        for (const auto& times_value : times_el.second)
-        {
-            fsm_time = compare_time;
-            cout << "\t" << times_value;
-            compare_time = times_value;
-        }
-        cout << "  " << fsm_time - compare_time << endl;
+//        int fsm_time { 0 }, quadratic_algorithm_time { 0 }, boyer_moore_time { 0 };
+        int fsm_time { 0 }, quadratic_algorithm_time { 0 }, boyer_moore_time { 0 };
+        fsm_time = static_cast<int>(times_el.second[0]);
+        quadratic_algorithm_time = static_cast<int>(times_el.second[1]);
+        boyer_moore_time = static_cast<int>(times_el.second[2]);
+//        int fsm_time { times_el.second[0] }, quadratic_algorithm_time { times_el.second[1] },
+//            boyer_moore_time { times_el.second[2] };
+//        for (const auto& times_value : times_el.second)
+//        {
+//            fsm_time = compare_time;
+//            cout << "\t" << times_value;
+//            compare_time = times_value;
+//        }
+        cout << "\t" << fsm_time << "\t" << quadratic_algorithm_time << " (" << fsm_time - quadratic_algorithm_time <<
+            ")\t" << boyer_moore_time << " (" << fsm_time - boyer_moore_time << ")\n";
+//        cout << "  " << fsm_time - compare_time << endl;
     }
 }
