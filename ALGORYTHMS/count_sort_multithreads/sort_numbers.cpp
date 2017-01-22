@@ -6,6 +6,7 @@
 
 #include "debug.h"
 #include "read_and_sort.h"
+#include "constants.h"
 
 using namespace std;
 
@@ -17,8 +18,6 @@ int main() {
     debug << "Filename " << in_filename << "\n";
 
     vector<size_t> numbers_from_file_vec;
-    const size_t numbers_in_range = 9000000;
-    const size_t proc_arch = 32;
 
     vector<bool> uniq_numbers_bool_vec(numbers_in_range, false);
     size_t bit_vec_size = numbers_in_range / proc_arch;

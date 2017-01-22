@@ -6,11 +6,9 @@
 #include <vector>
 
 #include "debug.h"
+#include "constants.h"
 
 using namespace std;
-
-const size_t proc_arch { 32 };
-const size_t min_permitted_number { 1000000 };
 
 void get_file_content(const string input_filename, vector<size_t>& numbers_from_file, bool& get_file_thread_finished, print_debug& debug) {
     ifstream input_fd(input_filename);
@@ -65,6 +63,7 @@ void sort_vec(vector<size_t>& numbers_from_file, vector<bool>& uniq_numbers_bool
         ++number;
     }
 
+    numbers_from_file_tmp.resize(i);
     numbers_from_file = numbers_from_file_tmp;
 }
 
@@ -93,5 +92,6 @@ void sort_numbers(vector<size_t>& numbers_from_file, vector<size_t>& numbers_bit
         }
     }
 
+    numbers_from_file_tmp.resize(k);
     numbers_from_file = numbers_from_file_tmp;
 }

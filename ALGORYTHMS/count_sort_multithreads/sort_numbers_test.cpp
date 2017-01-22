@@ -9,6 +9,7 @@
 
 #include "debug.h"
 #include "read_and_sort.h"
+#include "constants.h"
 
 using namespace std;
 
@@ -54,10 +55,8 @@ void create_test_file(const string& filename, const vector<size_t>& numbers_vec)
     }
 }
 
-vector<size_t> sort_file_content(const string& filename, vector<size_t>& not_sorted_vec, 
+vector<size_t> sort_file_content(const string& filename, vector<size_t>& not_sorted_vec,
                      vector<size_t>& numbers_from_file_vec, vector<size_t>& numbers_from_file_vec1, print_debug& debug) {
-    size_t numbers_in_range = 9000000;
-    size_t proc_arch = 32;
 
     vector<bool> uniq_numbers_bool_vec(numbers_in_range, false);
     size_t bit_vec_size = numbers_in_range / proc_arch;
@@ -90,7 +89,7 @@ int main() {
     //Test1
     {
         const string in_filename_test1 { "auto_testlist1.txt" };
-        const vector<size_t> test1_vec { 9999999, 8888888, 7777777, 6666666, 5555555, 4444444, 3333333, 2222222, 1000000 };
+        const vector<size_t> test1_vec { 9999999, 9999999, 8888888, 7777777, 7777777, 7777777, 6666666, 5555555, 4444444, 3333333, 2222222, 1000000 };
         const vector<size_t> test1_vec_sorted { 1000000, 2222222, 3333333, 4444444, 5555555, 6666666, 7777777, 8888888, 9999999 };
         create_test_file(in_filename_test1, test1_vec);
 
