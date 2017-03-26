@@ -1,9 +1,6 @@
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <string>
 #include <thread>
-#include <vector>
 
 #include "debug.h"
 #include "read_and_search.h"
@@ -18,7 +15,7 @@ int main() {
     debug << "Filename " << in_filename << "\n";
 
     bool get_file_thread_finished { false };
-    map<string, vector<string>> anagrams_map;
+    anagram_map_t anagrams_map;
 
     thread find_anagrams(get_file_content, in_filename,
                              ref(get_file_thread_finished), ref(anagrams_map), ref(debug));
